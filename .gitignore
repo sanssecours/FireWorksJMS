@@ -1,0 +1,9 @@
+# IntelliJ IDEA project files
+workspace.xml
+tasks.xml
+/.idea/dictionaries
+/.idea/libraries
+/.idea/copyright/profiles_settings.xml
+
+# Target file for binaries
+/target/*
