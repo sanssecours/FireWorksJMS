@@ -2,6 +2,28 @@
 
 batch
 
-jms-queue add --queue-address=fireWorksQueue --entries=queue/fireworks,java:jboss/exported/jms/queue/fireworks
+jms-queue add --queue-address=IdRocketQueue --entries=queue/ids/rockets,java:jboss/exported/jms/queue/ids/rockets
+jms-queue add --queue-address=IdPackageQueue --entries=queue/ids/packets,java:jboss/exported/jms/queue/ids/packets
+
+jms-queue add --queue-address=ClosedPropQueue --entries=queue/storage/propellents/closed,java:jboss/exported/jms/queue/storage/propellents/closed
+jms-queue add --queue-address=OpenedPropQueue --entries=queue/storage/propellents/opened,java:jboss/exported/jms/queue/storage/propellents/opened
+jms-queue add --queue-address=WoodQueue --entries=queue/storage/wood,java:jboss/exported/jms/queue/storage/wood
+jms-queue add --queue-address=CasingQueue --entries=queue/storage/casings,java:jboss/exported/jms/queue/storage/casings
+jms-queue add --queue-address=RocketQueue --entries=queue/storage/effects,java:jboss/exported/jms/queue/storage/effects
+
+jms-queue add --queue-address=GUIClosedPropQueue --entries=queue/gui/propellents/closed,java:jboss/exported/jms/queue/gui/propellents/closed
+jms-queue add --queue-address=GUIOpenedPropQueue --entries=queue/gui/propellents/opened,java:jboss/exported/jms/queue/gui/propellents/opened
+jms-queue add --queue-address=GUIWoodQueue --entries=queue/gui/wood,java:jboss/exported/jms/queue/gui/wood
+jms-queue add --queue-address=GUICasingQueue --entries=queue/gui/casings,java:jboss/exported/jms/queue/gui/casings
+jms-queue add --queue-address=GUIEffectQueue --entries=queue/gui/effects,java:jboss/exported/jms/queue/gui/effects
+jms-queue add --queue-address=GUIRocketQueue --entries=queue/gui/rockets,java:jboss/exported/jms/queue/gui/rockets
+
+jms-queue add --queue-address=ProducedRocketQueue --entries=queue/rockets/produced,java:jboss/exported/jms/queue/rockets/produced
+
+jms-queue add --queue-address=TestedRocketQueue --entries=queue/rockets/tested,java:jboss/exported/jms/queue/rockets/tested
+
+jms-queue add --queue-address=TrashedRocketQueue --entries=queue/rockets/trashed,java:jboss/exported/jms/queue/rockets/trashed
+
+jms-queue add --queue-address=ShippedRocketQueue --entries=queue/rockets/shipped,java:jboss/exported/jms/queue/rockets/shipped
 
 run-batch

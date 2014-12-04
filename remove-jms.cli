@@ -2,6 +2,28 @@
 
 batch
 
-jms-queue remove --queue-address=fireWorksQueue
+jms-queue remove --queue-address=IdRocketQueue
+jms-queue remove --queue-address=IdPackageQueue
+
+jms-queue remove --queue-address=ClosedPropQueue
+jms-queue remove --queue-address=OpenedPropQueue
+jms-queue remove --queue-address=WoodQueue
+jms-queue remove --queue-address=CasingQueue
+jms-queue remove --queue-address=RocketQueue
+
+jms-queue remove --queue-address=GUIClosedPropQueue
+jms-queue remove --queue-address=GUIOpenedPropQueue
+jms-queue remove --queue-address=GUIWoodQueue
+jms-queue remove --queue-address=GUICasingQueue
+jms-queue remove --queue-address=GUIEffectQueue
+jms-queue remove --queue-address=GUIRocketQueue
+
+jms-queue remove --queue-address=ProducedRocketQueue
+
+jms-queue remove --queue-address=TestedRocketQueue
+
+jms-queue remove --queue-address=TrashedRocketQueue
+
+jms-queue remove --queue-address=ShippedRocketQueue
 
 run-batch

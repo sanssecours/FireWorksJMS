@@ -30,6 +30,7 @@
     <orderEntry type="library" name="Maven: org.jboss.xnio:xnio-api:3.3.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.xnio:xnio-nio:3.3.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.wildfly:wildfly-build-config:8.2.0.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="JBoss 8.2.0.Final - JMS: Java Message Service" level="application_server_libraries" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">
