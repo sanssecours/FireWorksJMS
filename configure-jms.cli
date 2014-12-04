@@ -5,14 +5,14 @@ batch
 jms-queue add --queue-address=IdRocketQueue --entries=queue/ids/rockets,java:jboss/exported/jms/queue/ids/rockets
 jms-queue add --queue-address=IdPackageQueue --entries=queue/ids/packets,java:jboss/exported/jms/queue/ids/packets
 
-jms-queue add --queue-address=ClosedPropQueue --entries=queue/storage/propellents/closed,java:jboss/exported/jms/queue/storage/propellents/closed
-jms-queue add --queue-address=OpenedPropQueue --entries=queue/storage/propellents/opened,java:jboss/exported/jms/queue/storage/propellents/opened
+jms-queue add --queue-address=ClosedPropQueue --entries=queue/storage/propellants/closed,java:jboss/exported/jms/queue/storage/propellants/closed
+jms-queue add --queue-address=OpenedPropQueue --entries=queue/storage/propellants/opened,java:jboss/exported/jms/queue/storage/propellants/opened
 jms-queue add --queue-address=WoodQueue --entries=queue/storage/wood,java:jboss/exported/jms/queue/storage/wood
 jms-queue add --queue-address=CasingQueue --entries=queue/storage/casings,java:jboss/exported/jms/queue/storage/casings
 jms-queue add --queue-address=RocketQueue --entries=queue/storage/effects,java:jboss/exported/jms/queue/storage/effects
 
-jms-queue add --queue-address=GUIClosedPropQueue --entries=queue/gui/propellents/closed,java:jboss/exported/jms/queue/gui/propellents/closed
-jms-queue add --queue-address=GUIOpenedPropQueue --entries=queue/gui/propellents/opened,java:jboss/exported/jms/queue/gui/propellents/opened
+jms-queue add --queue-address=GUIClosedPropQueue --entries=queue/gui/propellants/closed,java:jboss/exported/jms/queue/gui/propellants/closed
+jms-queue add --queue-address=GUIOpenedPropQueue --entries=queue/gui/propellants/opened,java:jboss/exported/jms/queue/gui/propellants/opened
 jms-queue add --queue-address=GUIWoodQueue --entries=queue/gui/wood,java:jboss/exported/jms/queue/gui/wood
 jms-queue add --queue-address=GUICasingQueue --entries=queue/gui/casings,java:jboss/exported/jms/queue/gui/casings
 jms-queue add --queue-address=GUIEffectQueue --entries=queue/gui/effects,java:jboss/exported/jms/queue/gui/effects

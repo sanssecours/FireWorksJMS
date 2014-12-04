@@ -5,15 +5,15 @@ Queues für IDs:
     - Pakete (queue/ids/packets)
 
 Queue für jeden Bestandteil (Producer: Supplier, Consumer: Workers):
-    - Propellant (queue/storage/propellents/closed)
-    - Open Propellant (queue/storage/propellents/opened)
+    - Propellant (queue/storage/propellants/closed)
+    - Open Propellant (queue/storage/propellants/opened)
     - Wood (queue/storage/wood)
     - Casing (queue/storage/casings)
     - Effect (queue/storage/effects)
 
 Queues für GUI-Updates (Producer: Worker, Consumer: GUI)
-    - Propellant (queue/gui/propellents/closed)
-    - Open Propellant (queue/gui/propellents/opened)
+    - Propellant (queue/gui/propellants/closed)
+    - Open Propellant (queue/gui/propellants/opened)
     - Wood (queue/gui/wood)
     - Casing (queue/gui/casings)
     - Effect (queue/gui/effects)

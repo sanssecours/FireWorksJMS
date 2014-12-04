@@ -22,7 +22,7 @@ public class FireWorks {
 
     private static final String CONNECTION_FACTORY =
             "jms/RemoteConnectionFactory";
-    private static final String DESTINATION = "jms/queue/fireworks";
+    private static final String DESTINATION = "jms/queue/gui/propellants/closed";
     private static final String USERNAME = "fireworks";
     private static final String PASSWORD = "fireworks";
     private static final String INITIAL_CONTEXT_FACTORY =
