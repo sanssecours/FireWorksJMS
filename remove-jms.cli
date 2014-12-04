@@ -1,0 +1,7 @@
+# Remove the queues from the fireworks factory
+
+batch
+
+jms-queue remove --queue-address=fireWorksQueue
+
+run-batch
