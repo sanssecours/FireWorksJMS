@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="887.0" prefWidth="1198.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.falafel.FireWorks">
+   <children>
+      <SplitPane dividerPositions="0.5" layoutX="341.0" layoutY="233.0" orientation="VERTICAL" prefHeight="782.0" prefWidth="1090.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <SplitPane dividerPositions="0.5" layoutX="381.0" layoutY="113.0" prefHeight="386.0" prefWidth="1088.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="384.0" prefWidth="606.0">
+                           <children>
+                              <TableView fx:id="supplyTable" editable="true" layoutX="58.0" layoutY="-3.0" AnchorPane.bottomAnchor="55.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-3.0">
+                                <columns>
+                                  <TableColumn fx:id="supplierNameColumn" onEditCommit="#setSupplierName" prefWidth="278.0" text="Name" />
+                                  <TableColumn fx:id="orderedTypeColumn" onEditCommit="#setType" prefWidth="155.0" text="Type" />
+                                    <TableColumn fx:id="orderedQuantityColumn" onEditCommit="#setQuantity" prefWidth="89.0" text="Quantity" />
+                                    <TableColumn fx:id="orderedQualityColumn" onEditCommit="#setQuality" prefWidth="70.0" text="Quality" />
+                                </columns>
+                              </TableView>
+                              <Button layoutX="487.0" layoutY="399.0" mnemonicParsing="false" onAction="#startSuppliers" text="Start Suppliers" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+                              <Button layoutX="14.0" layoutY="399.0" mnemonicParsing="false" onAction="#newOrder" text="New Order" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="14.0" />
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="384.0" prefWidth="507.0">
+                           <children>
+                              <VBox layoutX="132.0" layoutY="75.0" spacing="20.0" AnchorPane.rightAnchor="132.0" AnchorPane.topAnchor="75.0">
+                                 <children>
+                                    <VBox>
+                                       <children>
+                                          <HBox alignment="CENTER_RIGHT" layoutX="75.0" layoutY="30.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="75.0" layoutY="30.0" text="Wood">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label fx:id="woodCounterLabel" alignment="CENTER_RIGHT" layoutX="197.0" layoutY="30.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label layoutX="297.0" layoutY="30.0" minWidth="-Infinity" prefWidth="120.0" text="Pieces">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER_RIGHT" layoutX="75.0" layoutY="58.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="75.0" layoutY="30.0" text="Casings">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label fx:id="casingsCounterLabel" alignment="CENTER_RIGHT" layoutX="197.0" layoutY="30.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label layoutX="297.0" layoutY="30.0" minWidth="-Infinity" prefWidth="120.0" text="Pieces">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER_RIGHT" layoutX="70.0" layoutY="97.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="75.0" layoutY="30.0" text="Effect">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label fx:id="effectCounterLabel" alignment="CENTER_RIGHT" layoutX="197.0" layoutY="30.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label layoutX="297.0" layoutY="30.0" minWidth="-Infinity" prefWidth="120.0" text="Pieces">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER_RIGHT" layoutX="70.0" layoutY="157.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="75.0" layoutY="30.0" text="Propellant">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label fx:id="propellantCounterLabel" alignment="CENTER_RIGHT" layoutX="197.0" layoutY="30.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                                <Label layoutX="297.0" layoutY="30.0" minWidth="-Infinity" prefWidth="120.0" text="Packages">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font>
+                                                </Label>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                    <Label alignment="CENTER_RIGHT" text="Opend Propellent:">
+                                       <font>
+                                          <Font size="24.0" />
+                                       </font>
+                                    </Label>
+                                    <VBox alignment="CENTER_RIGHT" layoutX="45.0" layoutY="193.0" spacing="2.0">
+                                       <children>
+                                          <HBox spacing="10.0" />
+                                          <HBox alignment="CENTER_RIGHT" layoutX="45.0" layoutY="193.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="171.0" layoutY="195.0" text="Number">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                                <Label fx:id="numberOpenPropellantLabel" alignment="CENTER_RIGHT" layoutX="233.0" layoutY="193.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                                <Label layoutX="327.0" layoutY="196.0" minWidth="-Infinity" prefWidth="120.0" text="Packages">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER_RIGHT" layoutX="170.0" layoutY="226.0" spacing="10.0">
+                                             <children>
+                                                <Label layoutX="170.0" layoutY="228.0" text="Quantity">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                                <Label fx:id="quantityOpenPropellantLabel" alignment="CENTER_RIGHT" layoutX="235.0" layoutY="226.0" prefWidth="81.0" text="0">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                                <Label layoutX="327.0" layoutY="228.0" prefWidth="120.0" text="g">
+                                                   <font>
+                                                      <Font size="24.0" />
+                                                   </font></Label>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                    <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                       <children>
+                                          <Label layoutX="144.0" layoutY="363.0" text="# Table">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="numberRocketsLabel" alignment="CENTER_RIGHT" layoutX="246.0" layoutY="363.0" prefWidth="81.0" text="0">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                          <Label layoutX="295.0" layoutY="363.0" prefWidth="120.0" text="Rockets">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children></AnchorPane>
+                    </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <VBox prefHeight="438.0" prefWidth="1196.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <TabPane layoutX="188.0" layoutY="28.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="1196.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="398.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <tabs>
+                            <Tab closable="false" onSelectionChanged="#displayProducedRocketsTab" text="Produced" />
+                            <Tab onSelectionChanged="#displayShippedRocketsTab" text="Shipped" />
+                              <Tab onSelectionChanged="#displayTrashedRocketsTab" text="Trashed" />
+                          </tabs>
+                        </TabPane>
+                        <TableView fx:id="rocketTable" layoutY="36.0" prefHeight="402.0" prefWidth="1196.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="36.0">
+                          <columns>
+                              <TableColumn fx:id="packageIdColumn" prefWidth="75.0" text="Package Nr." />
+                            <TableColumn fx:id="rocketIdColumn" prefWidth="63.0" text="Rocket ID" />
+                            <TableColumn fx:id="woodIdColumn" prefWidth="56.0" text="Wood ID" />
+                              <TableColumn fx:id="casingIdColumn" prefWidth="62.0" text="Casing ID" />
+                              <TableColumn fx:id="propellantIdColumn" prefWidth="85.0" text="Propellant IDs" />
+                              <TableColumn fx:id="propellantQuantityColumn" prefWidth="116.0" text="Quantity Propellant" />
+                              <TableColumn fx:id="effectIdColumn" prefWidth="57.0" text="Effect ID" />
+                              <TableColumn fx:id="testResultColumn" prefWidth="74.0" text="Defect" />
+                              <TableColumn fx:id="workerIdColumn" minWidth="0.0" prefWidth="64.0" text="Worker ID" />
+                              <TableColumn fx:id="testerIdColumn" prefWidth="59.0" text="Tester ID" />
+                              <TableColumn fx:id="packerIdColumn" prefWidth="68.0" text="Packer ID" />
+                              <TableColumn fx:id="supplierWoodIdColumn" prefWidth="93.0" text="Supplier Wood" />
+                              <TableColumn fx:id="supplierCasingColumn" prefWidth="95.0" text="Supplier Casing" />
+                              <TableColumn fx:id="supplierPropellantIdColumn" prefWidth="117.0" text="Supplier Propellant" />
+                              <TableColumn fx:id="supplierEffectIdColumn" prefWidth="91.0" text="Supplier Effect" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
