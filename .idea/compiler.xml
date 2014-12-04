@@ -25,5 +25,8 @@
         <module name="FireWorksJMS" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="FireWorksJMS" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
