@@ -1,13 +1,7 @@
 package org.falafel;
 
-import javax.jms.*;
-import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.ArrayList;
 import java.util.Random;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 
 /**
@@ -18,9 +12,9 @@ import javax.naming.NamingException;
 public class Supplier extends Thread {
 
     /** Constant for the lower bound of the loading time per element. */
-    private static final int LOWERBOUND = 1000;
+    private static final int LOWER_BOUND = 1000;
     /** Constant for the upper bound of the loading time per element. */
-    private static final int UPPERBOUND = 2000;
+    private static final int UPPER_BOUND = 2000;
     /** Constant for the division by 100. */
     private static final double HUNDRED = 100.0;
     /** Save the (unique) identifier for this supplier. */
@@ -32,9 +26,6 @@ public class Supplier extends Thread {
     private final SupplyOrder order;
     /** Save the (unique) identifier for the materials in this order. */
     private final int materialId;
-
-    private JMSCommunication communicator;
-
     /**
      * Create a new Supplier with a given id.
      *
@@ -58,17 +49,13 @@ public class Supplier extends Thread {
      * Start the supplier.
      */
     public final void run() {
-        //JMSCommunication.sendMessage(new Effect(1, "hugo", 1, true));
-        communicator = new JMSCommunication();
+        JMSCommunication communicator = new JMSCommunication();
 
         int functioningElements = (int) Math.ceil(
                 order.getQuantity() * order.getQuality() / HUNDRED);
         boolean defect;
-
-        ArrayList<Material> result;
         Material newEntry;
         String destinationStorage;
-        String destinationGUI;
 
         String orderType = order.getType();
         String orderSupplier = order.getSupplierName();
@@ -85,28 +72,23 @@ public class Supplier extends Thread {
             if (orderType.equals(casing)) {
                 newEntry = new Casing(materialId, orderSupplier, id);
                 destinationStorage = QueueDestinations.STORAGE_CASING_QUEUE;
-                destinationGUI = QueueDestinations.GUI_CASING_QUEUE;
             } else if (orderType.equals(effect)) {
                 defect = index >= functioningElements;
                 newEntry = new Effect(materialId, orderSupplier, id, defect);
                 destinationStorage = QueueDestinations.STORAGE_EFFECT_QUEUE;
-                destinationGUI = QueueDestinations.GUI_EFFECT_QUEUE;
             } else if (orderType.equals(propellant)) {
                 newEntry = new Propellant(materialId, orderSupplier, id,
                         Propellant.CLOSED);
                 destinationStorage =
                         QueueDestinations.STORAGE_CLOSED_PROP_QUEUE;
-                destinationGUI = QueueDestinations.GUI_CLOSED_PROP_QUEUE;
             } else {
                 newEntry = new Wood(materialId, orderSupplier, id);
                 destinationStorage = QueueDestinations.STORAGE_WOOD_QUEUE;
-                destinationGUI = QueueDestinations.GUI_WOOD_QUEUE;
             }
 
-            destinationGUI = QueueDestinations.GUI_WOOD_QUEUE;
 
             int waitingTime = randomGenerator.nextInt(
-                    UPPERBOUND - LOWERBOUND) + LOWERBOUND;
+                    UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
             try {
                 Thread.sleep(waitingTime);
             } catch (InterruptedException e) {
@@ -116,10 +98,11 @@ public class Supplier extends Thread {
 
             newEntry.setID(materialId + index);
 
+            // Send to resource queues
             //communicator.sendMessage(newEntry, destinationStorage);
-            //System.out.println(communicator.receiveMessage(destinationStorage));
-            communicator.sendMessage(newEntry, destinationGUI);
-            //System.out.println(communicator.receiveMessage(destinationGUI));
+
+            // Send to GUI
+            communicator.sendMessage(newEntry, QueueDestinations.GUI_QUEUE);
 
 
             LOGGER.info("Supplier " + id + " Wrote entry to queue "
