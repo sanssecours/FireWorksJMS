@@ -270,12 +270,12 @@ public class FireWorks extends Application implements MessageListener {
                 effects, propellants, 130, 434));
         */
         order.add(new SupplyOrder("Hulk", Casing.toString(), 5, 100));
-       /* order.add(new SupplyOrder("Iron Man", Wood.toString(), 5, 100));
+        order.add(new SupplyOrder("Iron Man", Wood.toString(), 5, 100));
         order.add(new SupplyOrder("Captain America", Effect.toString(), 5, 100));
         order.add(new SupplyOrder("Batman", Effect.toString(), 5, 80));
         order.add(new SupplyOrder("Thor", Effect.toString(), 5, 60));
         order.add(new SupplyOrder("Seaman", Propellant.toString(), 2, 100));
-        order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));*/
+        order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));
         //CHECKSTYLE:ON
 
         supplyTable.isEditable();
@@ -283,23 +283,6 @@ public class FireWorks extends Application implements MessageListener {
 
         rocketTable.setItems(rockets);
         numberRocketsProperty.set(Integer.toString(rockets.size()));
-    }
-
-    /**
-     * Updates the counters in the GUI.
-     *
-     * @param containerId
-     *          ID of the changed container
-     * @param difference
-     *          The value that should be added or subtracted from the element
-     *          with the identifier {@code containerId}.
-     *
-     */
-    public static void changeCounterLabels(final String containerId,
-                                           final int difference) {
-        Platform.runLater(() -> {
-            // je nach queue wird der counter verändert
-        });
     }
 
     /**
@@ -327,6 +310,62 @@ public class FireWorks extends Application implements MessageListener {
         System.out.println("No new order!");
     }
 
+    /**
+     * Updates the casing/effect/wood/closed propellant counters in the GUI.
+     *
+     * @param material
+     *          Material of which the counter should be updated
+     */
+    public static void changeCounterLabels(Material material) {
+        Platform.runLater(() -> {
+            int difference;
+            if (material.getInStorage()) {
+                difference = 1;
+            } else {
+                difference = -1;
+            }
+            if (material instanceof Casing) {
+                casingsCounter = casingsCounter + difference;
+                casingsCounterProperty.set(casingsCounter.toString());
+            }
+            if (material instanceof Effect) {
+                effectCounter = effectCounter + difference;
+                effectCounterProperty.set(effectCounter.toString());
+            }
+            if (material instanceof Propellant) {
+                propellantCounter = propellantCounter + difference;
+                propellantCounterProperty.set(
+                        propellantCounter.toString());
+            }
+            if (material instanceof Wood) {
+                woodCounter = woodCounter + difference;
+                woodCounterProperty.set(woodCounter.toString());
+            }
+        });
+    }
+    /**
+     * Updates the opened propellant counters in the GUI.
+     *
+     * @param propellant
+     *          the opened propellant which has changed
+     */
+    private void changeOpenedPropellantLabels(Propellant propellant) {
+        Platform.runLater(() -> {
+            if (propellant.getInStorage()) {
+                numberOpenPropellantCounter = numberOpenPropellantCounter + 1;
+                quantityOpenPropellantCounter = quantityOpenPropellantCounter
+                        + propellant.getQuantity();
+            } else {
+                numberOpenPropellantCounter = numberOpenPropellantCounter - 1;
+                quantityOpenPropellantCounter = quantityOpenPropellantCounter
+                        - propellant.getQuantity();
+            }
+            numberOpenPropellantCounterProperty.set(
+                    numberOpenPropellantCounter.toString());
+            quantityOpenPropellantCounterProperty.set(
+                    quantityOpenPropellantCounter.toString());
+        });
+    }
 
     /**
      * This method will be invoked when we create a new order.
@@ -447,7 +486,7 @@ public class FireWorks extends Application implements MessageListener {
     }
 
     /**
-     * Close the containers and the space.
+     * Close the program.
      */
     private static void close() {
         System.out.println("Goodbye!");
@@ -457,7 +496,7 @@ public class FireWorks extends Application implements MessageListener {
         launch(arguments);
     }
 
-    private final void initListeners() {
+    private void initListeners() {
         System.out.println("Set listeners to queues");
         try {
             // Set up the namingContext for the JNDI lookup
@@ -502,13 +541,26 @@ public class FireWorks extends Application implements MessageListener {
     public void onMessage(Message message) {
         try {
             if (((ObjectMessage) message).getObject() instanceof Wood) {
-                System.out.println ("Wood");
-            } else if (((ObjectMessage) message).getObject() instanceof Effect) {
-                System.out.println ("Effect");
-            } else if (((ObjectMessage) message).getObject() instanceof Propellant) {
-                System.out.println("Propellant");
-            } else if (((ObjectMessage) message).getObject() instanceof Casing) {
-                System.out.println("Casing");
+                changeCounterLabels(
+                        (Wood) ((ObjectMessage) message).getObject());
+            } else if (((ObjectMessage) message).getObject()
+                    instanceof Effect) {
+                changeCounterLabels(
+                        (Effect) ((ObjectMessage) message).getObject());
+            } else if (((ObjectMessage) message).getObject()
+                    instanceof Propellant) {
+                Propellant propellant = (Propellant)
+                        ((ObjectMessage) message).getObject();
+                if (propellant.getQuantity() == 500) {
+                    changeCounterLabels(
+                            (Propellant) ((ObjectMessage) message).getObject());
+                } else {
+                    changeOpenedPropellantLabels(propellant);
+                }
+            } else if (((ObjectMessage) message).getObject()
+                    instanceof Casing) {
+                changeCounterLabels(
+                        (Casing) ((ObjectMessage) message).getObject());
             }else if (((ObjectMessage) message).getObject() instanceof Rocket) {
                 System.out.println("Rocket");
             } else {
