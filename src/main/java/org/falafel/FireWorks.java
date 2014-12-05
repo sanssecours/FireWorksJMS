@@ -264,12 +264,12 @@ public class FireWorks extends Application {
                 effects, propellants, 130, 434));
         */
         order.add(new SupplyOrder("Hulk", Casing.toString(), 5, 100));
-        order.add(new SupplyOrder("Iron Man", Wood.toString(), 5, 100));
+       /* order.add(new SupplyOrder("Iron Man", Wood.toString(), 5, 100));
         order.add(new SupplyOrder("Captain America", Effect.toString(), 5, 100));
         order.add(new SupplyOrder("Batman", Effect.toString(), 5, 80));
         order.add(new SupplyOrder("Thor", Effect.toString(), 5, 60));
         order.add(new SupplyOrder("Seaman", Propellant.toString(), 2, 100));
-        order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));
+        order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));*/
         //CHECKSTYLE:ON
 
         supplyTable.isEditable();
@@ -447,7 +447,12 @@ public class FireWorks extends Application {
         System.out.println("Goodbye!");
     }
     public static void main(String[] arguments) {
+        initListeners();
         launch(arguments);
+    }
+
+    private static void initListeners() {
+        System.out.println("Set listeners to queues");
     }
 
     @Override

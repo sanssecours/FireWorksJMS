@@ -1,9 +1,13 @@
 package org.falafel;
 
+import javax.jms.*;
+import java.util.Properties;
 import java.util.logging.Logger;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Random;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 
 /**
@@ -24,11 +28,11 @@ public class Supplier extends Thread {
     /** Get the Logger for the current class. */
     private static final Logger LOGGER =
             Logger.getLogger(Supplier.class.getName());
-    /** The resource identifier for the space. */
     /** The order which the supplier shipped. */
     private final SupplyOrder order;
     /** Save the (unique) identifier for the materials in this order. */
     private final int materialId;
+
 
     /**
      * Create a new Supplier with a given id.
@@ -53,6 +57,7 @@ public class Supplier extends Thread {
      * Start the supplier.
      */
     public final void run() {
+        //JMSCommunication.sendMessage(new Effect(1, "hugo", 1, true));
 
         int functioningElements = (int) Math.ceil(
                 order.getQuantity() * order.getQuality() / HUNDRED);
@@ -60,6 +65,8 @@ public class Supplier extends Thread {
 
         ArrayList<Material> result;
         Material newEntry;
+        String destinationStorage;
+        String destinationGUI;
 
         String orderType = order.getType();
         String orderSupplier = order.getSupplierName();
@@ -75,14 +82,23 @@ public class Supplier extends Thread {
 
             if (orderType.equals(casing)) {
                 newEntry = new Casing(materialId, orderSupplier, id);
+                destinationStorage = QueueDestinations.STORAGE_CASING_QUEUE;
+                destinationGUI = QueueDestinations.GUI_CASING_QUEUE;
             } else if (orderType.equals(effect)) {
                 defect = index >= functioningElements;
                 newEntry = new Effect(materialId, orderSupplier, id, defect);
+                destinationStorage = QueueDestinations.STORAGE_EFFECT_QUEUE;
+                destinationGUI = QueueDestinations.GUI_EFFECT_QUEUE;
             } else if (orderType.equals(propellant)) {
                 newEntry = new Propellant(materialId, orderSupplier, id,
                         Propellant.CLOSED);
+                destinationStorage =
+                        QueueDestinations.STORAGE_CLOSED_PROP_QUEUE;
+                destinationGUI = QueueDestinations.GUI_CLOSED_PROP_QUEUE;
             } else {
                 newEntry = new Wood(materialId, orderSupplier, id);
+                destinationStorage = QueueDestinations.STORAGE_WOOD_QUEUE;
+                destinationGUI = QueueDestinations.GUI_WOOD_QUEUE;
             }
 
             int waitingTime = randomGenerator.nextInt(
@@ -96,11 +112,13 @@ public class Supplier extends Thread {
 
             newEntry.setID(materialId + index);
 
-            // write in queue
+            JMSCommunication.sendMessage(newEntry, destinationStorage);
+            System.out.println(JMSCommunication.receiveMessage(destinationStorage));
 
 
             LOGGER.info("Supplier " + id + " Wrote entry to container "
                     + orderType);
         }
+        //System.out.println(JMSCommunication.receiveMessage());
     }
 }
