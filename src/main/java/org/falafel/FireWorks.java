@@ -5,7 +5,6 @@
  */
 package org.falafel;
 
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -43,8 +42,6 @@ import static org.falafel.MaterialType.Casing;
 import static org.falafel.MaterialType.Effect;
 import static org.falafel.MaterialType.Propellant;
 import static org.falafel.MaterialType.Wood;
-
-import java.util.ArrayList;
 
 public class FireWorks extends Application implements MessageListener {
     private static final Logger LOGGER =
@@ -88,12 +85,16 @@ public class FireWorks extends Application implements MessageListener {
 
     /** Save data shown in the rocket table. */
     @FXML
-    private TableColumn<Rocket, String> casingIdColumn, packageIdColumn,
-            rocketIdColumn, woodIdColumn, propellantIdColumn,
-            propellantQuantityColumn, effectIdColumn, testResultColumn,
+    private TableColumn<Rocket, String> effectIdColumn, propellantIdColumn,
+            testResultColumn,  supplierPropellantIdColumn,
+            supplierEffectIdColumn;
+    /** Save data shown in the rocket table. */
+    @FXML
+    private TableColumn<Rocket, Number> rocketIdColumn, casingIdColumn,
+            packageIdColumn, woodIdColumn, propellantQuantityColumn,
             workerIdColumn, testerIdColumn, supplierWoodIdColumn,
-            supplierCasingColumn, supplierPropellantIdColumn,
-            supplierEffectIdColumn, packerIdColumn;
+            supplierCasingIdColumn, packerIdColumn;
+
     /** Save handler of the rocket table. */
     @FXML
     private TableView<Rocket> rocketTable = new TableView<>();
@@ -210,7 +211,7 @@ public class FireWorks extends Application implements MessageListener {
                 cellData -> cellData.getValue().getPackerIdProperty());
         supplierWoodIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getSupplierWoodIdProperty());
-        supplierCasingColumn.setCellValueFactory(
+        supplierCasingIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getSupplierCasingIdProperty());
         supplierPropellantIdColumn.setCellValueFactory(
                 cellData

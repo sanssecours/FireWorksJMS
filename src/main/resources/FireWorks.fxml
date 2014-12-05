@@ -205,7 +205,7 @@
                               <TableColumn fx:id="testerIdColumn" prefWidth="59.0" text="Tester ID" />
                               <TableColumn fx:id="packerIdColumn" prefWidth="68.0" text="Packer ID" />
                               <TableColumn fx:id="supplierWoodIdColumn" prefWidth="93.0" text="Supplier Wood" />
-                              <TableColumn fx:id="supplierCasingColumn" prefWidth="95.0" text="Supplier Casing" />
+                              <TableColumn fx:id="supplierCasingIdColumn" prefWidth="95.0" text="Supplier Casing" />
                               <TableColumn fx:id="supplierPropellantIdColumn" prefWidth="117.0" text="Supplier Propellant" />
                               <TableColumn fx:id="supplierEffectIdColumn" prefWidth="91.0" text="Supplier Effect" />
                           </columns>
