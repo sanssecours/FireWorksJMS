@@ -343,6 +343,7 @@ public class FireWorks extends Application implements MessageListener {
             }
         });
     }
+
     /**
      * Updates the opened propellant counters in the GUI.
      *
@@ -511,7 +512,7 @@ public class FireWorks extends Application implements MessageListener {
                     namingContext.lookup(CONNECTION_FACTORY);
 
             Destination destination = (Destination) namingContext.lookup(
-                    QueueDestinations.GUI_WOOD_QUEUE);
+                    QueueDestinations.GUI_QUEUE);
 
             JMSConsumer consumer =
                     connectionFactory.createContext(

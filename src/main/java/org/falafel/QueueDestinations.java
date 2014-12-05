@@ -18,18 +18,8 @@ public class QueueDestinations {
     public static final String STORAGE_EFFECT_QUEUE =
             "jms/queue/storage/effects";
 
-    public static final String GUI_CLOSED_PROP_QUEUE =
-            "jms/queue/gui/propellants/closed";
-    public static final String GUI_OPENED_PROP_QUEUE =
-            "jms/queue/gui/propellants/opened";
-    public static final String GUI_WOOD_QUEUE =
-            "jms/queue/gui/wood";
-    public static final String GUI_CASING_QUEUE =
-            "jms/queue/gui/casings";
-    public static final String GUI_EFFECT_QUEUE =
-            "jms/queue/gui/effects";
-    public static final String GUI_ROCKET_QUEUE =
-            "jms/queue/gui/rockets";
+    public static final String GUI_QUEUE =
+            "jms/queue/gui";
 
     public static final String ROCKET_PRODUCED_QUEUE =
             "jms/queue/rockets/produced";
