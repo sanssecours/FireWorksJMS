@@ -13,6 +13,8 @@ public class Material implements Serializable {
     private final String supplierName;
     /** Save the id of the supplier. */
     private final Integer supplierId;
+    /** save if the material is in Storage or not. */
+    private boolean inStorage;
 
     /**
      * Create a new material with the given attributes.
@@ -30,6 +32,7 @@ public class Material implements Serializable {
         id = identifier;
         this.supplierName = supplierName;
         this.supplierId = supplierId;
+        this.inStorage = true;
     }
 
     /**
