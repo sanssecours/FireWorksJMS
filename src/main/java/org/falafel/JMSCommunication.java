@@ -27,8 +27,10 @@ public class JMSCommunication {
     private static final String PROVIDER_URL =
             "http-remoting://127.0.0.1:8080";
 
-    public static void sendMessage(Material msgMaterial, String queue) {
-        Context namingContext = null;
+    private static Context namingContext;
+    private static ConnectionFactory connectionFactory;
+
+    public JMSCommunication () {
         try {
             // Set up the namingContext for the JNDI lookup
             final Properties env = new Properties();
@@ -38,9 +40,25 @@ public class JMSCommunication {
             env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
             namingContext = new InitialContext(env);
 
-            ConnectionFactory connectionFactory = (ConnectionFactory)
+            connectionFactory = (ConnectionFactory)
                     namingContext.lookup(CONNECTION_FACTORY);
+        } catch (NamingException e) {
+            LOGGER.severe("Could not create properties");
+        }
+    }
 
+    public void closeCommunication () {
+        if (namingContext != null) {
+            try {
+                namingContext.close();
+            } catch (NamingException e) {
+                LOGGER.severe("Could not could not close naming context ");
+            }
+        }
+    }
+
+    public void sendMessage(Material msgMaterial, String queue) {
+        try {
             Destination destination = (Destination) namingContext.lookup(
                     queue);
 
@@ -51,19 +69,11 @@ public class JMSCommunication {
         } catch (RuntimeException e) {
             LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
-            LOGGER.severe("Could not create properties");
-        } finally {
-            if (namingContext != null) {
-                try {
-                    namingContext.close();
-                } catch (NamingException e) {
-                    LOGGER.severe("Could not could not close naming context ");
-                }
-            }
+            LOGGER.severe("Could not find destination");
         }
     }
 
-    public static Object receiveMessage(String queue) {
+    public Object receiveMessage(String queue) {
         Context namingContext = null;
         Object text = null;
         try {

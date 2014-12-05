@@ -33,6 +33,7 @@ public class Supplier extends Thread {
     /** Save the (unique) identifier for the materials in this order. */
     private final int materialId;
 
+    private JMSCommunication communicator;
 
     /**
      * Create a new Supplier with a given id.
@@ -58,6 +59,7 @@ public class Supplier extends Thread {
      */
     public final void run() {
         //JMSCommunication.sendMessage(new Effect(1, "hugo", 1, true));
+        communicator = new JMSCommunication();
 
         int functioningElements = (int) Math.ceil(
                 order.getQuantity() * order.getQuality() / HUNDRED);
@@ -112,13 +114,15 @@ public class Supplier extends Thread {
 
             newEntry.setID(materialId + index);
 
-            JMSCommunication.sendMessage(newEntry, destinationStorage);
-            System.out.println(JMSCommunication.receiveMessage(destinationStorage));
+            //communicator.sendMessage(newEntry, destinationStorage);
+            //System.out.println(communicator.receiveMessage(destinationStorage));
+            communicator.sendMessage(newEntry, destinationGUI);
+            System.out.println(communicator.receiveMessage(destinationGUI));
 
 
             LOGGER.info("Supplier " + id + " Wrote entry to container "
                     + orderType);
         }
-        //System.out.println(JMSCommunication.receiveMessage());
+        communicator.closeCommunication();
     }
 }
