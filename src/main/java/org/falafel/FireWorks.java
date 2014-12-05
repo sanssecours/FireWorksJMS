@@ -5,13 +5,13 @@
  */
 package org.falafel;
 
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -39,15 +39,12 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
-import static java.util.Arrays.asList;
 import static org.falafel.MaterialType.Casing;
 import static org.falafel.MaterialType.Effect;
 import static org.falafel.MaterialType.Propellant;
 import static org.falafel.MaterialType.Wood;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class FireWorks extends Application implements MessageListener {
     private static final Logger LOGGER =
@@ -55,15 +52,12 @@ public class FireWorks extends Application implements MessageListener {
 
     private static final String CONNECTION_FACTORY =
             "jms/RemoteConnectionFactory";
-    private static final String DESTINATION = "jms/queue/gui/propellants/closed";
     private static final String USERNAME = "fireworks";
     private static final String PASSWORD = "fireworks";
     private static final String INITIAL_CONTEXT_FACTORY =
             "org.jboss.naming.remote.client.InitialContextFactory";
     private static final String PROVIDER_URL =
             "http-remoting://127.0.0.1:8080";
-    private static Context namingContext;
-    private static ConnectionFactory connectionFactory;
 
     /** The running id for the suppliers. */
     private static int supplierId = 1;
@@ -266,7 +260,7 @@ public class FireWorks extends Application implements MessageListener {
         propellants.put(new Propellant(5, "hugo", 3, org.falafel.Propellant.CLOSED), 130);
         ArrayList<Effect> effects = new ArrayList<>();
         effects.add(new Effect(3, "Hannes", 3, false));
-        rockets.add(new Rocket(1, new Wood(1, "hugo", 1), new Casing(2, "Rene", 2),
+        rockets.add(new Rocket(1, new Wood(1, "hugo", 100), new Casing(2, "Rene", 2),
                 effects, propellants, 130, 434));
         */
         order.add(new SupplyOrder("Hulk", Casing.toString(), 5, 100));
@@ -365,6 +359,32 @@ public class FireWorks extends Application implements MessageListener {
                     numberOpenPropellantCounter.toString());
             quantityOpenPropellantCounterProperty.set(
                     quantityOpenPropellantCounter.toString());
+        });
+    }
+
+    /**
+     * Updates the rocket in the shipped/trashed/rocket table.
+     *
+     * @param updatedRocket which has been tested
+     */
+    public static void updateOfARocketInRocketsTable(
+            final Rocket updatedRocket) {
+        Platform.runLater(() -> {
+            boolean rocketInTable = false;
+            for (int index = 0; index < rockets.size(); index++) {
+                Rocket rocket = rockets.get(index);
+                int id = rocket.getRocketId();
+                int newId = updatedRocket.getRocketId();
+                if (id == newId) {
+                    rockets.set(index, updatedRocket);
+                    rocketInTable = true;
+                    break;
+                }
+            }
+            if (!rocketInTable) {
+                rockets.add(updatedRocket);
+                numberRocketsProperty.set(Integer.toString(rockets.size()));
+            }
         });
     }
 
@@ -506,9 +526,9 @@ public class FireWorks extends Application implements MessageListener {
             env.put(Context.PROVIDER_URL, PROVIDER_URL);
             env.put(Context.SECURITY_PRINCIPAL, USERNAME);
             env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
-            namingContext = new InitialContext(env);
+            Context namingContext = new InitialContext(env);
 
-            connectionFactory = (ConnectionFactory)
+            ConnectionFactory connectionFactory = (ConnectionFactory)
                     namingContext.lookup(CONNECTION_FACTORY);
 
             Destination destination = (Destination) namingContext.lookup(
@@ -563,7 +583,8 @@ public class FireWorks extends Application implements MessageListener {
                 changeCounterLabels(
                         (Casing) ((ObjectMessage) message).getObject());
             }else if (((ObjectMessage) message).getObject() instanceof Rocket) {
-                System.out.println("Rocket");
+                updateOfARocketInRocketsTable(
+                        (Rocket) ((ObjectMessage) message).getObject());
             } else {
                 System.out.println("Wrong message in queue");
             }
