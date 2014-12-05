@@ -385,6 +385,17 @@ public class FireWorks extends Application implements MessageListener {
                 rockets.add(updatedRocket);
                 numberRocketsProperty.set(Integer.toString(rockets.size()));
             }
+            if (updatedRocket.getPackerId() != 0) {
+                if (updatedRocket.getTestResult()) {
+                    trashedRocketsList.add(updatedRocket);
+                    numberTrashedRocketsProperty.set(Integer.toString(
+                            trashedRocketsList.size()));
+                } else {
+                    packedRocketsList.add(updatedRocket);
+                    numberShippedRocketsProperty.set(Integer.toString(
+                            packedRocketsList.size()));
+                }
+            }
         });
     }
 
@@ -586,10 +597,10 @@ public class FireWorks extends Application implements MessageListener {
                 updateOfARocketInRocketsTable(
                         (Rocket) ((ObjectMessage) message).getObject());
             } else {
-                System.out.println("Wrong message in queue");
+                LOGGER.severe("Wrong message in queue");
             }
         } catch (JMSException e) {
-            e.printStackTrace();
+            LOGGER.severe("Problems with GUI queue");
         }
     }
 }

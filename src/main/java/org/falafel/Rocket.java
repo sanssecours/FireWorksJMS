@@ -255,6 +255,14 @@ public class Rocket implements Serializable {
         this.packerId = packerId;
     }
     /**
+     * Get the id of the worker who packed the rocket in logistics.
+     *
+     * @return packerId the id for the packer of the rocket
+     */
+    public final Integer getPackerId() {
+        return packerId;
+    }
+    /**
      * Set the id of the package containing the rocket.
      *
      * @param id of the package
