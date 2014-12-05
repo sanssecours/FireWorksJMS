@@ -11,12 +11,7 @@ jms-queue remove --queue-address=WoodQueue
 jms-queue remove --queue-address=CasingQueue
 jms-queue remove --queue-address=RocketQueue
 
-jms-queue remove --queue-address=GUIClosedPropQueue
-jms-queue remove --queue-address=GUIOpenedPropQueue
-jms-queue remove --queue-address=GUIWoodQueue
-jms-queue remove --queue-address=GUICasingQueue
-jms-queue remove --queue-address=GUIEffectQueue
-jms-queue remove --queue-address=GUIRocketQueue
+jms-queue remove --queue-address=GUIQueue
 
 jms-queue remove --queue-address=ProducedRocketQueue
 
