@@ -27,8 +27,8 @@ public class JMSCommunication {
     private static final String PROVIDER_URL =
             "http-remoting://127.0.0.1:8080";
 
-    private static Context namingContext;
-    private static ConnectionFactory connectionFactory;
+    private Context namingContext;
+    private ConnectionFactory connectionFactory;
 
     public JMSCommunication () {
         try {
@@ -47,6 +47,9 @@ public class JMSCommunication {
         }
     }
 
+    /**
+     * Closes the communication with the server.
+     */
     public void closeCommunication () {
         if (namingContext != null) {
             try {
@@ -54,6 +57,22 @@ public class JMSCommunication {
             } catch (NamingException e) {
                 LOGGER.severe("Could not could not close naming context ");
             }
+        }
+    }
+
+    public void sendMessage(Rocket msgRocket, String queue) {
+        try {
+            Destination destination = (Destination) namingContext.lookup(
+                    queue);
+
+            try (JMSContext context = connectionFactory.createContext(
+                    USERNAME, PASSWORD)) {
+                context.createProducer().send(destination, msgRocket);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.severe("Could not write in queue");
+        } catch (NamingException e) {
+            LOGGER.severe("Could not find destination");
         }
     }
 
@@ -74,20 +93,8 @@ public class JMSCommunication {
     }
 
     public Object receiveMessage(String queue) {
-        Context namingContext = null;
         Object text = null;
         try {
-            // Set up the namingContext for the JNDI lookup
-            final Properties env = new Properties();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
-            env.put(Context.PROVIDER_URL, PROVIDER_URL);
-            env.put(Context.SECURITY_PRINCIPAL, USERNAME);
-            env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
-            namingContext = new InitialContext(env);
-
-            ConnectionFactory connectionFactory = (ConnectionFactory)
-                    namingContext.lookup(CONNECTION_FACTORY);
-
             Destination destination = (Destination) namingContext.lookup(
                     queue);
 
@@ -100,14 +107,6 @@ public class JMSCommunication {
             LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
             LOGGER.severe("Could not create properties");
-        } finally {
-            if (namingContext != null) {
-                try {
-                    namingContext.close();
-                } catch (NamingException e) {
-                    LOGGER.severe("Could not could not close naming context ");
-                }
-            }
         }
         return text;
     }

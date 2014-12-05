@@ -103,6 +103,8 @@ public class Supplier extends Thread {
                 destinationGUI = QueueDestinations.GUI_WOOD_QUEUE;
             }
 
+            destinationGUI = QueueDestinations.GUI_WOOD_QUEUE;
+
             int waitingTime = randomGenerator.nextInt(
                     UPPERBOUND - LOWERBOUND) + LOWERBOUND;
             try {
@@ -117,10 +119,10 @@ public class Supplier extends Thread {
             //communicator.sendMessage(newEntry, destinationStorage);
             //System.out.println(communicator.receiveMessage(destinationStorage));
             communicator.sendMessage(newEntry, destinationGUI);
-            System.out.println(communicator.receiveMessage(destinationGUI));
+            //System.out.println(communicator.receiveMessage(destinationGUI));
 
 
-            LOGGER.info("Supplier " + id + " Wrote entry to container "
+            LOGGER.info("Supplier " + id + " Wrote entry to queue "
                     + orderType);
         }
         communicator.closeCommunication();

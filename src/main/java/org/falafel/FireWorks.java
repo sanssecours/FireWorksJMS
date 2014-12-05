@@ -12,6 +12,10 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -45,7 +49,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FireWorks extends Application {
+public class FireWorks extends Application implements MessageListener {
     private static final Logger LOGGER =
             Logger.getLogger(FireWorks.class.getName());
 
@@ -58,6 +62,8 @@ public class FireWorks extends Application {
             "org.jboss.naming.remote.client.InitialContextFactory";
     private static final String PROVIDER_URL =
             "http-remoting://127.0.0.1:8080";
+    private static Context namingContext;
+    private static ConnectionFactory connectionFactory;
 
     /** The running id for the suppliers. */
     private static int supplierId = 1;
@@ -446,18 +452,43 @@ public class FireWorks extends Application {
     private static void close() {
         System.out.println("Goodbye!");
     }
+
     public static void main(String[] arguments) {
-        initListeners();
         launch(arguments);
     }
 
-    private static void initListeners() {
+    private final void initListeners() {
         System.out.println("Set listeners to queues");
+        try {
+            // Set up the namingContext for the JNDI lookup
+            final Properties env = new Properties();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+            env.put(Context.PROVIDER_URL, PROVIDER_URL);
+            env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+            env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+            namingContext = new InitialContext(env);
+
+            connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    QueueDestinations.GUI_WOOD_QUEUE);
+
+            JMSConsumer consumer =
+                    connectionFactory.createContext(
+                            USERNAME, PASSWORD).createConsumer(
+                            destination);
+
+            consumer.setMessageListener(this);
+        } catch (NamingException e) {
+            LOGGER.severe("Could not create properties");
+        }
+
     }
 
     @Override
     public final void start(final Stage primaryStage) throws Exception {
-
+        initListeners();
         Parent root = FXMLLoader.load(
                 getClass().getResource("/FireWorks.fxml"));
 
@@ -465,6 +496,27 @@ public class FireWorks extends Application {
         primaryStage.setOnCloseRequest(event -> close());
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+    }
+
+    @Override
+    public void onMessage(Message message) {
+        try {
+            if (((ObjectMessage) message).getObject() instanceof Wood) {
+                System.out.println ("Wood");
+            } else if (((ObjectMessage) message).getObject() instanceof Effect) {
+                System.out.println ("Effect");
+            } else if (((ObjectMessage) message).getObject() instanceof Propellant) {
+                System.out.println("Propellant");
+            } else if (((ObjectMessage) message).getObject() instanceof Casing) {
+                System.out.println("Casing");
+            }else if (((ObjectMessage) message).getObject() instanceof Rocket) {
+                System.out.println("Rocket");
+            } else {
+                System.out.println("Wrong message in queue");
+            }
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
     }
 }
 
