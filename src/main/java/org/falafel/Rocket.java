@@ -47,7 +47,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the id of the rocket.
      *
-     * @return Returns the ids of the rocket as StringProperty.
+     * @return Returns the ids of the rocket as IntegerProperty.
      */
     public final IntegerProperty getIdProperty() {
         return new SimpleIntegerProperty(id);
@@ -55,7 +55,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the id of the package in which the rocket is placed.
      *
-     * @return Returns the ids of the package as StringProperty.
+     * @return Returns the ids of the package as IntegerProperty.
      */
     public final IntegerProperty getPackageIdProperty() {
         return new SimpleIntegerProperty(packageId);
@@ -63,7 +63,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the id of the built in casing.
      *
-     * @return Returns the id of the casing as a StringProperty.
+     * @return Returns the id of the casing as a IntegerProperty.
      */
     public final IntegerProperty getCasingIdProperty() {
         return new SimpleIntegerProperty(casing.getID());
@@ -86,7 +86,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the id of the built in wood.
      *
-     * @return Returns the string property of the built in wood.
+     * @return Returns the IntegerProperty of the built in wood.
      */
     public final IntegerProperty getWoodIdProperty() {
         return new SimpleIntegerProperty(wood.getID());
