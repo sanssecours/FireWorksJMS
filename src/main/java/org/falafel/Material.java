@@ -47,7 +47,7 @@ public class Material implements Serializable {
     }
 
     /**
-     * Get the identifier of the material.
+     * Set the identifier of the material.
      *
      * @param newId
      *          The (unique) identifier of the material
@@ -76,6 +76,24 @@ public class Material implements Serializable {
     @SuppressWarnings("unused")
     public final int getSupplierId() {
         return supplierId;
+    }
+    /**
+     * Set the location of the material.
+     *
+     * @param inStorage
+     *          is the material in storage (true)
+     */
+    public final void setInStorage(final boolean inStorage) {
+        this.inStorage = inStorage;
+    }
+
+    /**
+     * Get the location of the material.
+     *
+     * @return if the material is in storage
+     */
+    public final boolean getInStorage() {
+        return inStorage;
     }
 
     //CHECKSTYLE:OFF
