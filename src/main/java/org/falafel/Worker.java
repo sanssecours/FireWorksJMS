@@ -3,14 +3,13 @@ package org.falafel;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 import static java.util.logging.Logger.getLogger;
 import static org.falafel.QueueDestinations.STORAGE_CASING_QUEUE;
 import static org.falafel.QueueDestinations.STORAGE_EFFECT_QUEUE;
 import static org.falafel.QueueDestinations.STORAGE_OPENED_PROP_QUEUE;
-import static org.falafel.Utility.sleep;
 import static org.falafel.QueueDestinations.STORAGE_WOOD_QUEUE;
+import static org.falafel.Utility.sleep;
 
 /**
  * This class represents a worker. A worker collects materials and uses them
@@ -33,6 +32,16 @@ public final class Worker {
      *  set to true after we press CTR-C. */
     private static boolean shutdown = false;
 
+    /** The wood used to produce a rocket. */
+    private static Wood wood = null;
+    /** The casing used to produce a rocket. */
+    private static Casing casing = null;
+    /** The effects needed to produce a rocket. */
+    private static ArrayList<Effect> effects = new ArrayList<>();
+
+    /** Communication facility for JMS. */
+    private static JMSCommunication communication = new JMSCommunication();
+
     /** Create the worker singleton. */
     private Worker() { }
 
@@ -46,12 +55,9 @@ public final class Worker {
     public static void main(final String[] arguments) {
         int workerId;
 
-        Casing casing;
-        ArrayList<Effect> effects = new ArrayList<>();
-        JMSCommunication communication = new JMSCommunication();
         Propellant propellant;
+        Object effect;
         Random randomGenerator = new Random();
-        Wood wood;
 
         if (arguments.length != 1) {
             System.err.println("Usage: worker <Id>!");
@@ -69,17 +75,35 @@ public final class Worker {
 
         LOGGER.info("Worker " + workerId + " ready to work!");
 
+        workLoop:
         while (!shutdown) {
-            /** Get materials */
+            /* Get materials */
             wood = (Wood) communication.receiveMessage(STORAGE_WOOD_QUEUE);
-            LOGGER.info("Took material: " + wood);
+            if (wood == null) {
+                continue;
+            }
+            LOGGER.info("Took: " + wood);
+
             casing = (Casing) communication.receiveMessage(
                     STORAGE_CASING_QUEUE);
-            LOGGER.info("Took material: " + casing);
-            IntStream.range(0, NUMBER_EFFECTS_NEEDED).forEach(
-                effect -> effects.add((Effect) communication.receiveMessage(
-                        STORAGE_EFFECT_QUEUE)));
-            LOGGER.info("Took material: " + effects);
+            if (casing == null) {
+                returnMaterials();
+                continue;
+            }
+            LOGGER.info("Took: " + casing);
+
+            for (int effectCharge = 0; effectCharge < NUMBER_EFFECTS_NEEDED;
+                    effectCharge++) {
+                effect = communication.receiveMessage(STORAGE_EFFECT_QUEUE);
+                if (effect == null) {
+                    returnMaterials();
+                    continue workLoop;
+                }
+                effects.add((Effect) communication.receiveMessage(
+                        STORAGE_EFFECT_QUEUE));
+            }
+            LOGGER.info("Took: " + effects);
+
             propellant = (Propellant) communication.receiveMessage(
                     STORAGE_OPENED_PROP_QUEUE);
             LOGGER.info("Took material: " + propellant);
@@ -90,6 +114,21 @@ public final class Worker {
             sleep(waitingTime);
         }
 
+    }
+
+    /**
+     * Return taken materials if one of them could not be acquired.
+     */
+    private static void returnMaterials() {
+        if (wood != null) {
+            communication.sendMessage(wood, STORAGE_WOOD_QUEUE);
+        }
+        if (casing != null) {
+            communication.sendMessage(casing, STORAGE_CASING_QUEUE);
+        }
+        for (Effect effect : effects) {
+            communication.sendMessage(effect, STORAGE_EFFECT_QUEUE);
+        }
     }
 
     /**
