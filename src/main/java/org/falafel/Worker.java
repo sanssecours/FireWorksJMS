@@ -1,10 +1,16 @@
 package org.falafel;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import static java.util.logging.Logger.getLogger;
+import static org.falafel.QueueDestinations.STORAGE_CASING_QUEUE;
+import static org.falafel.QueueDestinations.STORAGE_EFFECT_QUEUE;
+import static org.falafel.QueueDestinations.STORAGE_OPENED_PROP_QUEUE;
 import static org.falafel.Utility.sleep;
+import static org.falafel.QueueDestinations.STORAGE_WOOD_QUEUE;
 
 /**
  * This class represents a worker. A worker collects materials and uses them
@@ -18,9 +24,11 @@ public final class Worker {
     private static final int UPPER_BOUND = 2000;
     /** Constant for how long the shutdown hook is waiting. */
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
-
+    /** How many effect charges are needed to build a rocket. */
+    private static final int NUMBER_EFFECTS_NEEDED = 3;
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(Worker.class.getName());
+
     /** Specifies if we want to terminate the program. This variable will be
      *  set to true after we press CTR-C. */
     private static boolean shutdown = false;
@@ -36,10 +44,14 @@ public final class Worker {
      *
      */
     public static void main(final String[] arguments) {
-        Worker.addShutdownHook();
-
         int workerId;
+
+        Casing casing;
+        ArrayList<Effect> effects = new ArrayList<>();
+        JMSCommunication communication = new JMSCommunication();
+        Propellant propellant;
         Random randomGenerator = new Random();
+        Wood wood;
 
         if (arguments.length != 1) {
             System.err.println("Usage: worker <Id>!");
@@ -53,15 +65,29 @@ public final class Worker {
             return;
         }
 
+        Worker.addShutdownHook();
+
         LOGGER.info("Worker " + workerId + " ready to work!");
 
-        // The time needed to produce a rocket
-        int waitingTime = randomGenerator.nextInt(
-                UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
-        sleep(waitingTime);
-
         while (!shutdown) {
-            sleep(WAIT_TIME_TO_SHUTDOWN);
+            /** Get materials */
+            wood = (Wood) communication.receiveMessage(STORAGE_WOOD_QUEUE);
+            LOGGER.info("Took material: " + wood);
+            casing = (Casing) communication.receiveMessage(
+                    STORAGE_CASING_QUEUE);
+            LOGGER.info("Took material: " + casing);
+            IntStream.range(0, NUMBER_EFFECTS_NEEDED).forEach(
+                effect -> effects.add((Effect) communication.receiveMessage(
+                        STORAGE_EFFECT_QUEUE)));
+            LOGGER.info("Took material: " + effects);
+            propellant = (Propellant) communication.receiveMessage(
+                    STORAGE_OPENED_PROP_QUEUE);
+            LOGGER.info("Took material: " + propellant);
+
+            // The time needed to produce a rocket
+            int waitingTime = randomGenerator.nextInt(
+                    UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
+            sleep(waitingTime);
         }
 
     }

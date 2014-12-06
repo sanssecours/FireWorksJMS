@@ -99,7 +99,7 @@ public class Supplier extends Thread {
             newEntry.setID(materialId + index);
 
             // Send to resource queues
-            //communicator.sendMessage(newEntry, destinationStorage);
+            communicator.sendMessage(newEntry, destinationStorage);
 
             // Send to GUI
             communicator.sendMessage(newEntry, QueueDestinations.GUI_QUEUE);
