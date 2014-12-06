@@ -11,7 +11,7 @@ Queue für jeden Bestandteil (Producer: Supplier, Consumer: Workers):
     - Casing (queue/storage/casings)
     - Effect (queue/storage/effects)
 
-- Queue für GUI-Updates (queue/gui
+- Queue für GUI-Updates (queue/gui)
 
 - Queue für produzierte Raketen (queue/rockets/produced)
 
