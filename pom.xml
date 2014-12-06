@@ -17,6 +17,8 @@
         <version.wildfly.maven.plugin>1.0.2.Final</version.wildfly.maven.plugin>
         <version.wildfly>8.2.0.Final</version.wildfly>
         <version.exec.plugin>1.2</version.exec.plugin>
+
+        <worker.id>1001</worker.id>
     </properties>
 
     <dependencies>
@@ -47,6 +49,32 @@
                         </executions>
                         <configuration>
                             <mainClass>org.falafel.FireWorks</mainClass>
+                            <classpathScope>runtime</classpathScope>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>Worker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${version.exec.plugin}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>org.falafel.Worker</mainClass>
+                            <arguments>
+                                <argument>${worker.id}</argument>
+                            </arguments>
                             <classpathScope>runtime</classpathScope>
                         </configuration>
                     </plugin>
