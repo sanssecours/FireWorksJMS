@@ -20,3 +20,13 @@ welche er genommenund und wieder zurückgelegt hat (rollback) vom Server gelösc
 Löschen der Queue Daten:
 Unter Windows ist im standalone Ordner ein "daten" Ordner, welcher gelöscht
 werden kann und die Queues werden gelöscht.
+
+
+Probleme / Noch zu machen / Darüber nachdenken
+- Logistiker gibt raketen welche er nicht verpacken kann nicht in FiFo
+    Reihenfolge zurück
+- Welche Logger Ausgaben sind wo sinnvoll?
+- Mehr kommentare
+- readMe machen
+- Server Einstellung einfacher machen
+
