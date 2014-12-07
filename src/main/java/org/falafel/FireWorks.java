@@ -258,13 +258,13 @@ public class FireWorks extends Application implements MessageListener {
         rockets.add(new Rocket(1, new Wood(1, "hugo", 100), new Casing(2, "Rene", 2),
                 effects, propellants, 130, 434));
         */
-        order.add(new SupplyOrder("Hulk", Casing.toString(), 5, 100));
-        order.add(new SupplyOrder("Iron Man", Wood.toString(), 5, 100));
-        order.add(new SupplyOrder("Captain America", Effect.toString(), 5, 100));
-        order.add(new SupplyOrder("Batman", Effect.toString(), 5, 80));
-        order.add(new SupplyOrder("Thor", Effect.toString(), 5, 60));
-        //order.add(new SupplyOrder("Seaman", Propellant.toString(), 2, 100));
-        //order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));
+        order.add(new SupplyOrder("Hulk", Casing.toString(), 50, 100));
+        order.add(new SupplyOrder("Iron Man", Wood.toString(), 50, 100));
+        order.add(new SupplyOrder("Captain America", Effect.toString(), 50, 100));
+        order.add(new SupplyOrder("Batman", Effect.toString(), 50, 80));
+        order.add(new SupplyOrder("Thor", Effect.toString(), 50, 60));
+        order.add(new SupplyOrder("Seaman", Propellant.toString(), 20, 100));
+        order.add(new SupplyOrder("Hawk", Propellant.toString(), 30, 100));
         //CHECKSTYLE:ON
 
         supplyTable.isEditable();
@@ -611,7 +611,7 @@ public class FireWorks extends Application implements MessageListener {
                 first = 1;
                 last = 0;
             }
-            while ((last-first) < 10 ) {
+            while ((last-first) < 9 ) {
                 last++;
                 communicator.sendMessage(last,
                         QueueDestinations.ID_ROCKET_QUEUE);
@@ -628,7 +628,7 @@ public class FireWorks extends Application implements MessageListener {
                 first = 1;
                 last = 0;
             }
-            while ((last-first) < 10 ) {
+            while ((last-first) < 9 ) {
                 last++;
                 communicator.sendMessage(last,
                         QueueDestinations.ID_PACKET_QUEUE);
