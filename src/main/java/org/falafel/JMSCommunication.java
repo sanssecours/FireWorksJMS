@@ -1,12 +1,11 @@
 package org.falafel;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -124,5 +123,26 @@ public class JMSCommunication {
             LOGGER.severe("Could not create properties");
         }
         return text;
+    }
+
+    public ArrayList<Object> readMessagesInQueue(String queue) {
+        ArrayList<Object> messages = new ArrayList<>();
+        try (JMSContext context = connectionFactory.createContext(
+                USERNAME, PASSWORD)) {
+            Queue destinationQueue = (Queue) namingContext.lookup(queue);
+            QueueBrowser browser = context.createBrowser(destinationQueue);
+            Enumeration enumeration = browser.getEnumeration();
+            while (enumeration.hasMoreElements()) {
+                Object object = ((ObjectMessage)
+                        enumeration.nextElement()).getObject();
+                messages.add(object);
+            }
+            browser.close();
+        } catch (JMSException e) {
+            e.printStackTrace();
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+        return messages;
     }
 }

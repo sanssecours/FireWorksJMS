@@ -5,16 +5,10 @@
  */
 package org.falafel;
 
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
+import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -328,9 +322,14 @@ public class FireWorks extends Application implements MessageListener {
                 effectCounterProperty.set(effectCounter.toString());
             }
             if (material instanceof Propellant) {
-                propellantCounter = propellantCounter + difference;
-                propellantCounterProperty.set(
-                        propellantCounter.toString());
+                Propellant propellant = (Propellant) material;
+                if (propellant.getQuantity() == 500) {
+                    propellantCounter = propellantCounter + difference;
+                    propellantCounterProperty.set(
+                            propellantCounter.toString());
+                } else {
+                    changeOpenedPropellantLabels(propellant);
+                }
             }
             if (material instanceof Wood) {
                 woodCounter = woodCounter + difference;
@@ -345,7 +344,7 @@ public class FireWorks extends Application implements MessageListener {
      * @param propellant
      *          the opened propellant which has changed
      */
-    private void changeOpenedPropellantLabels(Propellant propellant) {
+    private static void changeOpenedPropellantLabels(Propellant propellant) {
         Platform.runLater(() -> {
             if (propellant.getInStorage()) {
                 numberOpenPropellantCounter = numberOpenPropellantCounter + 1;
@@ -553,11 +552,86 @@ public class FireWorks extends Application implements MessageListener {
                             destination);
 
             consumer.setMessageListener(this);
-            // write the first 10 ids for rockets and packages in the queue
+
             JMSCommunication communicator = new JMSCommunication();
-            for(Integer id = 1; id <= 10; id++) {
-                communicator.sendMessage(id, QueueDestinations.ID_ROCKET_QUEUE);
-                communicator.sendMessage(id, QueueDestinations.ID_PACKET_QUEUE);
+            // read the content of the storage queues
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_CASING_QUEUE)) {
+                changeCounterLabels((Casing) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_EFFECT_QUEUE)) {
+                changeCounterLabels((Effect) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_CLOSED_PROP_QUEUE)) {
+                changeCounterLabels((Propellant) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_OPENED_PROP_QUEUE)) {
+                changeCounterLabels((Propellant) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_WOOD_QUEUE)) {
+                changeCounterLabels((Wood) object);
+            }
+
+            // read the content of the rocket queues
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ROCKET_PRODUCED_QUEUE)) {
+                updateOfARocketInRocketsTable((Rocket) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ROCKET_TESTED_QUEUE)) {
+                updateOfARocketInRocketsTable((Rocket) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ROCKET_SHIPPED_QUEUE)) {
+                updateOfARocketInRocketsTable((Rocket) object);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ROCKET_TRASHED_QUEUE)) {
+                updateOfARocketInRocketsTable((Rocket) object);
+            }
+
+            // Check with ids are in the queues and fill them so that each
+            // contains 10 ids
+            TreeSet<Integer> ids = new TreeSet<>();
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ID_ROCKET_QUEUE)) {
+                ids.add((Integer) object);
+            }
+            int first;
+            int last;
+            try {
+                first = ids.first();
+                last = ids.last();
+            } catch (NoSuchElementException e) {
+                LOGGER.info("Rocket ids queue empty.");
+                first = 1;
+                last = 0;
+            }
+            while ((last-first) < 10 ) {
+                last++;
+                communicator.sendMessage(last,
+                        QueueDestinations.ID_ROCKET_QUEUE);
+            }
+            for(Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.ID_PACKET_QUEUE)) {
+                ids.add((Integer) object);
+            }
+            try {
+                first = ids.first();
+                last = ids.last();
+            } catch (NoSuchElementException e) {
+                LOGGER.info("Packet ids queue empty.");
+                first = 1;
+                last = 0;
+            }
+            while ((last-first) < 10 ) {
+                last++;
+                communicator.sendMessage(last,
+                        QueueDestinations.ID_PACKET_QUEUE);
             }
         } catch (NamingException e) {
             LOGGER.severe("Could not create properties");
@@ -591,12 +665,8 @@ public class FireWorks extends Application implements MessageListener {
                     instanceof Propellant) {
                 Propellant propellant = (Propellant)
                         ((ObjectMessage) message).getObject();
-                if (propellant.getQuantity() == 500) {
-                    changeCounterLabels(
-                            (Propellant) ((ObjectMessage) message).getObject());
-                } else {
-                    changeOpenedPropellantLabels(propellant);
-                }
+                changeCounterLabels(
+                        (Propellant) ((ObjectMessage) message).getObject());
             } else if (((ObjectMessage) message).getObject()
                     instanceof Casing) {
                 changeCounterLabels(
