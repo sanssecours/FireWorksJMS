@@ -19,6 +19,7 @@
         <version.exec.plugin>1.2</version.exec.plugin>
 
         <worker.id>1001</worker.id>
+        <tester.id>2001</tester.id>
     </properties>
 
     <dependencies>
@@ -74,6 +75,32 @@
                             <mainClass>org.falafel.Worker</mainClass>
                             <arguments>
                                 <argument>${worker.id}</argument>
+                            </arguments>
+                            <classpathScope>runtime</classpathScope>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>Tester</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${version.exec.plugin}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>org.falafel.QualityTester</mainClass>
+                            <arguments>
+                                <argument>${tester.id}</argument>
                             </arguments>
                             <classpathScope>runtime</classpathScope>
                         </configuration>

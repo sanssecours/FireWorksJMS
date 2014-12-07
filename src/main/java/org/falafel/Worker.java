@@ -263,6 +263,8 @@ public final class Worker {
 
             communicator.sendMessage(producedRocket,
                     QueueDestinations.GUI_QUEUE);
+            communicator.sendMessage(producedRocket,
+                    QueueDestinations.ROCKET_PRODUCED_QUEUE);
 
             // write the used propellant package back if it still contains
             // propellant
@@ -279,6 +281,7 @@ public final class Worker {
                 }
             }
         }
+        communicator.closeCommunication();
     }
 
     /**
