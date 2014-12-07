@@ -67,10 +67,8 @@ public class JMSCommunication {
                     USERNAME, PASSWORD)) {
                 context.createProducer().send(destination, msgId);
             }
-        } catch (RuntimeException e) {
-            LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
-            LOGGER.severe("Could not find destination");
+            LOGGER.severe("Could not lookup destination!");
         }
     }
 
@@ -83,10 +81,8 @@ public class JMSCommunication {
                     USERNAME, PASSWORD)) {
                 context.createProducer().send(destination, msgRocket);
             }
-        } catch (RuntimeException e) {
-            LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
-            LOGGER.severe("Could not find destination");
+            LOGGER.severe("Could not lookup destination!");
         }
     }
 
@@ -99,10 +95,22 @@ public class JMSCommunication {
                     USERNAME, PASSWORD)) {
                 context.createProducer().send(destination, msgMaterial);
             }
-        } catch (RuntimeException e) {
-            LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
-            LOGGER.severe("Could not find destination");
+            LOGGER.severe("Could not lookup destination!");
+        }
+    }
+
+    public void sendMessage(RocketPackage msgRocketPackage, String queue) {
+        try {
+            Destination destination = (Destination) namingContext.lookup(
+                    queue);
+
+            try (JMSContext context = connectionFactory.createContext(
+                    USERNAME, PASSWORD)) {
+                context.createProducer().send(destination, msgRocketPackage);
+            }
+        } catch (NamingException e) {
+            LOGGER.severe("Could not lookup destination!");
         }
     }
 
@@ -117,10 +125,8 @@ public class JMSCommunication {
                 JMSConsumer consumer = context.createConsumer(destination);
                 text = consumer.receiveBody(Object.class, 5000);
             }
-        } catch (RuntimeException e) {
-            LOGGER.severe("Could not write in queue");
         } catch (NamingException e) {
-            LOGGER.severe("Could not create properties");
+            LOGGER.severe("Could not lookup destination!");
         }
         return text;
     }
@@ -138,10 +144,10 @@ public class JMSCommunication {
                 messages.add(object);
             }
             browser.close();
-        } catch (JMSException e) {
-            e.printStackTrace();
         } catch (NamingException e) {
-            e.printStackTrace();
+            LOGGER.severe("Could not lookup destination!");
+        } catch (JMSException e) {
+            LOGGER.severe("Could not get enumeration!");
         }
         return messages;
     }

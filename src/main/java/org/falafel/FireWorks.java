@@ -674,6 +674,13 @@ public class FireWorks extends Application implements MessageListener {
             }else if (((ObjectMessage) message).getObject() instanceof Rocket) {
                 updateOfARocketInRocketsTable(
                         (Rocket) ((ObjectMessage) message).getObject());
+            } else if (((ObjectMessage) message).getObject() instanceof
+                    RocketPackage) {
+                ArrayList<Rocket> packedRockets = ((RocketPackage)
+                        ((ObjectMessage) message).getObject()).getRockets();
+                for (Rocket rocket : packedRockets) {
+                    updateOfARocketInRocketsTable(rocket);
+                }
             } else {
                 LOGGER.severe("Wrong message in queue");
             }
