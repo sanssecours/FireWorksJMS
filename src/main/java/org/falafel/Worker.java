@@ -67,11 +67,11 @@ public final class Worker {
      */
     public static void main(final String[] arguments) {
         int workerId;
-        Wood wood = null;
-        Casing casing = null;
+        Wood wood;
+        Casing casing;
         ArrayList<Effect> effects = new ArrayList<>();
-        HashMap<Propellant, Integer> propellantsWithQuantity =
-                new HashMap<>();
+        HashMap<Propellant, Integer> propellantsWithQuantity;
+        Integer rocketId;
         JMSCommunication communicator = new JMSCommunication();
         Random randomGenerator = new Random();
 
@@ -109,6 +109,7 @@ public final class Worker {
         Destination destinationCasing;
         Destination destinationOpenedPropellant;
         Destination destinationClosedPropellant;
+        Destination destinationRocketId;
         try {
             destinationWood = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_WOOD_QUEUE);
@@ -120,6 +121,8 @@ public final class Worker {
                     QueueDestinations.STORAGE_OPENED_PROP_QUEUE);
             destinationClosedPropellant = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_CLOSED_PROP_QUEUE);
+            destinationRocketId = (Destination) namingContext.lookup(
+                    QueueDestinations.ID_ROCKET_QUEUE);
         } catch (NamingException e) {
             LOGGER.severe("Could not create queue destinations");
             return;
@@ -131,7 +134,7 @@ public final class Worker {
 
         workerLoop:
         while (!shutdown) {
-            int propellantQuantity = 0;
+            int propellantQuantity;
             effects.clear();
             /* Get materials */
             try (JMSContext context = connectionFactory.createContext(
@@ -141,22 +144,20 @@ public final class Worker {
                 wood = consumerWood.receiveBodyNoWait(Wood.class);
                 if (wood == null) {
                     context.rollback();
-                    LOGGER.severe("could not get wood");
+                    LOGGER.info("could not get wood");
                     Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
-                System.out.println("Got: " + wood);
 
                 JMSConsumer consumerCasing = context.createConsumer(
                         destinationCasing);
                 casing = consumerCasing.receiveBodyNoWait(Casing.class);
                 if (casing == null) {
                     context.rollback();
-                    LOGGER.severe("could not get casings");
+                    LOGGER.info("could not get casings");
                     Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
-                System.out.println("Got: " + casing);
 
                 JMSConsumer consumerEffect = context.createConsumer(
                         destinationEffect);
@@ -169,11 +170,10 @@ public final class Worker {
                 }
                 if (effects.size() != NUMBER_EFFECTS_NEEDED) {
                     context.rollback();
-                    LOGGER.severe("could not get effect got: " + effects);
+                    LOGGER.info("could not get all effects. Got: " + effects);
                     Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
-                System.out.println("Got: " + effects);
 
                 propellantQuantity = randomGenerator.nextInt(
                         UPPER_QUANTITY - LOWER_QUANTITY) + LOWER_QUANTITY;
@@ -215,15 +215,29 @@ public final class Worker {
                                     missingQuantity);
                         } else {
                             context.rollback();
-                            LOGGER.severe("could not get propellant got: "
+                            LOGGER.info("Could not get all propellant. Got: "
                                     + propellantsWithQuantity);
                             Utility.sleep(WAIT_TIME_WORKER_MS);
                             continue workerLoop;
                         }
                     }
                 }
+
+                // get an id for the rocket from the queue
+                JMSConsumer consumerRocketId = context.createConsumer(
+                        destinationRocketId);
+                rocketId = consumerRocketId.receiveBodyNoWait(Integer.class);
+                if (rocketId == null) {
+                    context.rollback();
+                    LOGGER.severe("Could not get an rocket id!");
+                    Utility.sleep(WAIT_TIME_WORKER_MS);
+                    continue;
+                }
                 context.commit();
             }
+            // write a new rocket id in the queue for the taken one
+            communicator.sendMessage(rocketId + 10,
+                    QueueDestinations.ID_ROCKET_QUEUE);
 
             //write to GUI what was taken
             casing.setInStorage(false);
@@ -243,15 +257,6 @@ public final class Worker {
             int waitingTime = randomGenerator.nextInt(
                     UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
             sleep(waitingTime);
-
-            // get an id and write a new on in the queue
-            Integer rocketId;
-            do {
-                rocketId = (Integer) communicator.receiveMessage(
-                        QueueDestinations.ID_ROCKET_QUEUE);
-            } while(rocketId == null);
-            communicator.sendMessage(rocketId + 10,
-                    QueueDestinations.ID_ROCKET_QUEUE);
 
             // Worker produces rocket
             Rocket producedRocket = new Rocket(rocketId, wood, casing, effects,
