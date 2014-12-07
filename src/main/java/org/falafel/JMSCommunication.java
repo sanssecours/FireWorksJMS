@@ -59,6 +59,21 @@ public class JMSCommunication {
             }
         }
     }
+    public void sendMessage(Integer msgId, String queue) {
+        try {
+            Destination destination = (Destination) namingContext.lookup(
+                    queue);
+
+            try (JMSContext context = connectionFactory.createContext(
+                    USERNAME, PASSWORD)) {
+                context.createProducer().send(destination, msgId);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.severe("Could not write in queue");
+        } catch (NamingException e) {
+            LOGGER.severe("Could not find destination");
+        }
+    }
 
     public void sendMessage(Rocket msgRocket, String queue) {
         try {

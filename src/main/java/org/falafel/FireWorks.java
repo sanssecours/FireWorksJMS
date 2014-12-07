@@ -175,7 +175,7 @@ public class FireWorks extends Application implements MessageListener {
             new SimpleStringProperty("0");
     private static StringProperty numberTrashedRocketsProperty =
             new SimpleStringProperty("0");
-
+    private JMSConsumer consumer;
 
 
     /**
@@ -269,8 +269,8 @@ public class FireWorks extends Application implements MessageListener {
         order.add(new SupplyOrder("Captain America", Effect.toString(), 5, 100));
         order.add(new SupplyOrder("Batman", Effect.toString(), 5, 80));
         order.add(new SupplyOrder("Thor", Effect.toString(), 5, 60));
-        order.add(new SupplyOrder("Seaman", Propellant.toString(), 2, 100));
-        order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));
+        //order.add(new SupplyOrder("Seaman", Propellant.toString(), 2, 100));
+        //order.add(new SupplyOrder("Hawk", Propellant.toString(), 3, 100));
         //CHECKSTYLE:ON
 
         supplyTable.isEditable();
@@ -521,7 +521,8 @@ public class FireWorks extends Application implements MessageListener {
     /**
      * Close the program.
      */
-    private static void close() {
+    private void close() {
+        //consumer.close();
         System.out.println("Goodbye!");
     }
 
@@ -546,12 +547,18 @@ public class FireWorks extends Application implements MessageListener {
             Destination destination = (Destination) namingContext.lookup(
                     QueueDestinations.GUI_QUEUE);
 
-            JMSConsumer consumer =
+            consumer =
                     connectionFactory.createContext(
                             USERNAME, PASSWORD).createConsumer(
                             destination);
 
             consumer.setMessageListener(this);
+            // write the first 10 ids for rockets and packages in the queue
+            JMSCommunication communicator = new JMSCommunication();
+            for(Integer id = 1; id <= 10; id++) {
+                communicator.sendMessage(id, QueueDestinations.ID_ROCKET_QUEUE);
+                communicator.sendMessage(id, QueueDestinations.ID_PACKET_QUEUE);
+            }
         } catch (NamingException e) {
             LOGGER.severe("Could not create properties");
         }
