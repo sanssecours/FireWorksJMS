@@ -89,12 +89,9 @@ public class Supplier extends Thread {
 
             int waitingTime = randomGenerator.nextInt(
                     UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
-            try {
-                Thread.sleep(waitingTime);
-            } catch (InterruptedException e) {
-                LOGGER.severe("I was interrupted while trying to sleep. "
-                        + "How rude!");
-            }
+
+            Utility.sleep(waitingTime);
+
 
             newEntry.setID(materialId + index);
 

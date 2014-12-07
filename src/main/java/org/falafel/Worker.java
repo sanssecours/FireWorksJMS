@@ -142,7 +142,7 @@ public final class Worker {
                 if (wood == null) {
                     context.rollback();
                     LOGGER.severe("could not get wood");
-                    Thread.sleep(WAIT_TIME_WORKER_MS);
+                    Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
                 System.out.println("Got: " + wood);
@@ -153,7 +153,7 @@ public final class Worker {
                 if (casing == null) {
                     context.rollback();
                     LOGGER.severe("could not get casings");
-                    Thread.sleep(WAIT_TIME_WORKER_MS);
+                    Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
                 System.out.println("Got: " + casing);
@@ -170,7 +170,7 @@ public final class Worker {
                 if (effects.size() != NUMBER_EFFECTS_NEEDED) {
                     context.rollback();
                     LOGGER.severe("could not get effect got: " + effects);
-                    Thread.sleep(WAIT_TIME_WORKER_MS);
+                    Utility.sleep(WAIT_TIME_WORKER_MS);
                     continue;
                 }
                 System.out.println("Got: " + effects);
@@ -217,15 +217,12 @@ public final class Worker {
                             context.rollback();
                             LOGGER.severe("could not get propellant got: "
                                     + propellantsWithQuantity);
-                            Thread.sleep(WAIT_TIME_WORKER_MS);
+                            Utility.sleep(WAIT_TIME_WORKER_MS);
                             continue workerLoop;
                         }
                     }
                 }
                 context.commit();
-            } catch (InterruptedException e) {
-                LOGGER.severe("I was interrupted while trying to sleep. "
-                        + "How rude!");
             }
 
             //write to GUI what was taken
