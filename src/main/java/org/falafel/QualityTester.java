@@ -14,9 +14,6 @@ import static java.util.logging.Logger.getLogger;
  *      it contains less than 120g of the propellant charge
  */
 public final class QualityTester {
-
-    /** Constant for the transaction timeout time. */
-    private static final int TRANSACTION_TIMEOUT = 3000;
     /** Specifies how long a tester waits until he tries to get a new rocket
      *  after he was unable to get one the last time. */
     private static final int WAIT_TIME_TESTER_MS = 2000;
