@@ -5,14 +5,6 @@
  */
 package org.falafel;
 
-import java.util.*;
-import java.util.logging.Logger;
-
-import javax.jms.*;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,6 +23,16 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
+
+import javax.jms.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import static org.falafel.MaterialType.Casing;
 import static org.falafel.MaterialType.Effect;
@@ -587,7 +589,10 @@ public class FireWorks extends Application implements MessageListener {
             }
             for(Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_SHIPPED_QUEUE)) {
-                updateOfARocketInRocketsTable((Rocket) object);
+                RocketPackage rocketPackage = (RocketPackage) object;
+                for(Rocket rocket : rocketPackage.getRockets()) {
+                    updateOfARocketInRocketsTable(rocket);
+                }
             }
             for(Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_TRASHED_QUEUE)) {
