@@ -1,4 +1,4 @@
-standalone config ändern:
+Standalone config ändern:
 
 <address-settings>
     <address-setting match="#">
@@ -11,11 +11,15 @@ standalone config ändern:
     </address-setting>
 </address-settings>
 
+Der entsprechende Befehl für `jboss-cli`:
+
+/subsystem=messaging/hornetq-server=default/address-setting=#/:write-attribute(name=max-delivery-attempts,value=-1)
+
 wenn "max-delivery-attempts" nicht auf -1 gesetzt wird würde jede nach einer
-gewissen Anzahl von zustellungs versuchen die Nachricht vom Server gelöscht.
-Jedes rollback wird als ein Versuch gewerted, also wenn ein Arbeiter in 10
+gewissen Anzahl von Zustellungsversuchen die Nachricht vom Server gelöscht.
+Jedes rollback wird als ein Versuch gewertet, also wenn ein Arbeiter in 10
 (Default Wert) Versuchen seine Materialien nicht zusammen bekommt, werden die
-welche er genommenund und wieder zurückgelegt hat (rollback) vom Server gelöscht
+welche er genommen und und wieder zurückgelegt hat (rollback) vom Server gelöscht
 
 Löschen der Queue Daten:
 Unter Windows ist im standalone Ordner ein "daten" Ordner, welcher gelöscht
@@ -27,6 +31,3 @@ Probleme / Noch zu machen / Darüber nachdenken
     Reihenfolge zurück
 - Welche Logger Ausgaben sind wo sinnvoll?
 - Mehr kommentare
-- readMe machen
-- Server Einstellung einfacher machen
-
