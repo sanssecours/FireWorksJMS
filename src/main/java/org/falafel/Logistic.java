@@ -61,12 +61,14 @@ public final class Logistic {
                     QueueDestinations.ROCKET_TESTED_QUEUE);
             if (rocket == null) {
                 LOGGER.info("Could not get enough rockets!");
-                // put not packet rockets back
+                // put not packed rockets back
                 for (Rocket returnRocket : functioningRockets) {
                     returnRocket.setPackerId(0);
                     returnRocket.setReadyForCollection(false);
                     communicator.sendMessage(returnRocket,
                             QueueDestinations.ROCKET_TESTED_QUEUE);
+                    communicator.sendMessage(returnRocket,
+                            QueueDestinations.GUI_QUEUE);
                 }
                 functioningRockets.clear();
                 Utility.sleep(WAIT_TIME_LOGISTIC_MS);
@@ -91,8 +93,7 @@ public final class Logistic {
                 Integer packageId;
                 packageId = (Integer) communicator.receiveMessage(
                             QueueDestinations.ID_PACKET_QUEUE);
-                if (packageId == null)
-                {
+                if (packageId == null) {
                     LOGGER.severe("Could not get a package id!");
                     // put not packet rockets back
                     for (Rocket returnRocket : functioningRockets) {
@@ -100,6 +101,8 @@ public final class Logistic {
                         returnRocket.setReadyForCollection(false);
                         communicator.sendMessage(returnRocket,
                                 QueueDestinations.ROCKET_TESTED_QUEUE);
+                        communicator.sendMessage(returnRocket,
+                                QueueDestinations.GUI_QUEUE);
                     }
                     functioningRockets.clear();
                     Utility.sleep(WAIT_TIME_LOGISTIC_MS);
