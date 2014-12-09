@@ -19,12 +19,17 @@ To compile and execute the programs contained in this repository you need the fo
 
 ## Configuration
 
-1. Start the web server
+1. Add an application user
+
+- Unix: `add-user.sh -a -u 'fireworks' -p 'fireworks' -g 'guest'`
+- Windows: `add-user.bat  -a -u 'fireworks' -p 'fireworks' -g 'guest'`
+
+2. Start the web server
 
 - Unix: `standalone.sh -c standalone-full.xml`
 - Windows: `standalone.bat -c standalone-full.xml`
 
-2. Add the configuration data to the web server
+3. Add the configuration data to the web server
 
 - Unix: `jboss-cli.sh --connect --file=configure-jms.cli`
 - Windows: `jboss-cli.bat --connect --file=configure-jms.cli`
