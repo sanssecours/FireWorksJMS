@@ -24,8 +24,17 @@
                                     <TableColumn fx:id="orderedQualityColumn" onEditCommit="#setQuality" prefWidth="70.0" text="Quality" />
                                 </columns>
                               </TableView>
-                              <Button layoutX="487.0" layoutY="399.0" mnemonicParsing="false" onAction="#startSuppliers" text="Start Suppliers" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-                              <Button layoutX="14.0" layoutY="399.0" mnemonicParsing="false" onAction="#newOrder" text="New Order" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="14.0" />
+                              <HBox layoutX="14.0" layoutY="397.0" spacing="272.0" AnchorPane.bottomAnchor="14.0">
+                                 <children>
+                                    <HBox layoutX="14.0" layoutY="399.0" spacing="10.0">
+                                       <children>
+                                          <Button layoutX="14.0" layoutY="399.0" mnemonicParsing="false" onAction="#newOrder" text="New Order" AnchorPane.bottomAnchor="12.0" AnchorPane.leftAnchor="14.0" />
+                                          <Button layoutX="109.0" layoutY="399.0" mnemonicParsing="false" onAction="#clearOrder" text="Clear Orders" />
+                                       </children>
+                                    </HBox>
+                                    <Button layoutX="487.0" layoutY="399.0" mnemonicParsing="false" onAction="#startSuppliers" text="Start Suppliers" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+                                 </children>
+                              </HBox>
                            </children>
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="384.0" prefWidth="507.0">

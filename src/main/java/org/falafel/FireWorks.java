@@ -693,5 +693,9 @@ public class FireWorks extends Application implements MessageListener {
             LOGGER.severe("Problems with GUI queue");
         }
     }
+
+    public void clearOrder(ActionEvent actionEvent) {
+        order.clear();
+    }
 }
 
