@@ -141,7 +141,7 @@ public final class Worker {
                     USERNAME, PASSWORD, JMSContext.SESSION_TRANSACTED)) {
                 JMSConsumer consumerWood = context.createConsumer(
                         destinationWood);
-                wood = consumerWood.receiveBodyNoWait(Wood.class);
+                wood = consumerWood.receiveBody(Wood.class, 5000);
                 if (wood == null) {
                     context.rollback();
                     LOGGER.info("could not get wood");
@@ -151,7 +151,7 @@ public final class Worker {
 
                 JMSConsumer consumerCasing = context.createConsumer(
                         destinationCasing);
-                casing = consumerCasing.receiveBodyNoWait(Casing.class);
+                casing = consumerCasing.receiveBody(Casing.class, 5000);
                 if (casing == null) {
                     context.rollback();
                     LOGGER.info("could not get casings");
@@ -162,8 +162,8 @@ public final class Worker {
                 JMSConsumer consumerEffect = context.createConsumer(
                         destinationEffect);
                 for (int index = 0; index < NUMBER_EFFECTS_NEEDED; index++) {
-                    Effect effect = consumerEffect.receiveBodyNoWait(
-                            Effect.class);
+                    Effect effect = consumerEffect.receiveBody(
+                            Effect.class, 5000);
                     if (effect != null) {
                         effects.add(effect);
                     }
@@ -185,8 +185,8 @@ public final class Worker {
                     JMSConsumer consumerOpenedPropellant =
                             context.createConsumer(destinationOpenedPropellant);
                     Propellant propellant =
-                            consumerOpenedPropellant.receiveBodyNoWait(
-                                    Propellant.class);
+                            consumerOpenedPropellant.receiveBody(
+                                    Propellant.class, 5000);
                     if(propellant != null) {
                         int currentQuantity = propellant.getQuantity();
                         if (currentQuantity >= missingQuantity) {
@@ -207,8 +207,8 @@ public final class Worker {
                                 context.createConsumer(
                                         destinationClosedPropellant);
                         Propellant closedPropellant =
-                                consumerClosedPropellant.receiveBodyNoWait(
-                                        Propellant.class);
+                                consumerClosedPropellant.receiveBody(
+                                        Propellant.class, 5000);
                         if (closedPropellant != null) {
                             quantity = quantity + missingQuantity;
                             propellantsWithQuantity.put(closedPropellant,
@@ -226,7 +226,7 @@ public final class Worker {
                 // get an id for the rocket from the queue
                 JMSConsumer consumerRocketId = context.createConsumer(
                         destinationRocketId);
-                rocketId = consumerRocketId.receiveBodyNoWait(Integer.class);
+                rocketId = consumerRocketId.receiveBody(Integer.class, 5000);
                 if (rocketId == null) {
                     context.rollback();
                     LOGGER.severe("Could not get an rocket id!");
