@@ -9,12 +9,12 @@ jms-queue remove --queue-address=ClosedPropQueue
 jms-queue remove --queue-address=OpenedPropQueue
 jms-queue remove --queue-address=WoodQueue
 jms-queue remove --queue-address=CasingQueue
-jms-queue remove --queue-address=RocketQueue
+jms-queue remove --queue-address=EffectQueue
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.ClosedPropQueue/:remove
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OpenedPropQueue/:remove
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.WoodQueue/:remove
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.CasingQueue/:remove
-/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.RocketQueue/:remove
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.EffectQueue/:remove
 
 jms-queue remove --queue-address=GUIQueue
 
