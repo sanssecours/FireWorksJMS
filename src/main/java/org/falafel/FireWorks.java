@@ -47,11 +47,13 @@ import static org.falafel.MaterialType.Casing;
 import static org.falafel.MaterialType.Effect;
 import static org.falafel.MaterialType.Propellant;
 import static org.falafel.MaterialType.Wood;
+import static org.falafel.Propellant.FULL;
 import static org.falafel.Utility.CONNECTION_FACTORY;
-import static org.falafel.Utility.USERNAME;
-import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.IDS_QUEUES_INIT;
 import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PASSWORD;
 import static org.falafel.Utility.PROVIDER_URL;
+import static org.falafel.Utility.USERNAME;
 
 /**
  * Main class for the project. This class provides an interface to start
@@ -189,14 +191,13 @@ public class FireWorks extends Application implements MessageListener {
     @FXML
     private static IntegerProperty numberTrashedRocketsProperty =
             new SimpleIntegerProperty(0);
-    private JMSConsumer consumer;
-
 
     /**
      * Initializes the controller class. This method is automatically called
      * after the fxml file has been loaded.
      */
     @FXML
+    @SuppressWarnings("unused")
     private void initialize() {
         // initialize rocket table
         rocketIdColumn.setCellValueFactory(
@@ -228,8 +229,8 @@ public class FireWorks extends Application implements MessageListener {
         supplierCasingIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getSupplierCasingIdProperty());
         supplierPropellantIdColumn.setCellValueFactory(
-                cellData
-                        -> cellData.getValue().getSupplierPropellantIdProperty());
+                cellData ->
+                        cellData.getValue().getSupplierPropellantIdProperty());
         supplierEffectIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getSupplierEffectIdProperty());
 
@@ -295,6 +296,7 @@ public class FireWorks extends Application implements MessageListener {
      *
      */
     @FXML
+    @SuppressWarnings("unused")
     private void startSuppliers(final ActionEvent event) {
         SupplyOrder nextOrder;
         Supplier supplier;
@@ -317,7 +319,7 @@ public class FireWorks extends Application implements MessageListener {
      * @param material
      *          Material of which the counter should be updated
      */
-    public static void changeCounterLabels(Material material) {
+    public static void changeCounterLabels(final Material material) {
         Platform.runLater(() -> {
             int difference;
             if (material.getInStorage()) {
@@ -335,7 +337,7 @@ public class FireWorks extends Application implements MessageListener {
             }
             if (material instanceof Propellant) {
                 Propellant propellant = (Propellant) material;
-                if (propellant.getQuantity() == 500) {
+                if (propellant.getQuantity() == FULL) {
                     propellantCounter = propellantCounter + difference;
                     propellantCounterProperty.set(
                             propellantCounter.toString());
@@ -356,7 +358,8 @@ public class FireWorks extends Application implements MessageListener {
      * @param propellant
      *          the opened propellant which has changed
      */
-    private static void changeOpenedPropellantLabels(Propellant propellant) {
+    private static void changeOpenedPropellantLabels(
+            final Propellant propellant) {
         Platform.runLater(() -> {
             if (propellant.getInStorage()) {
                 numberOpenPropellantCounter = numberOpenPropellantCounter + 1;
@@ -428,6 +431,7 @@ public class FireWorks extends Application implements MessageListener {
      *          The event sent by JavaFx when the user interface
      *          element for this method is invoked.
      */
+    @SuppressWarnings("unused")
     public final void displayShippedRocketsTab(final Event event) {
         rocketTable.setItems(packedRocketsList);
         numberRocketsLabel.textProperty().bind(
@@ -441,6 +445,7 @@ public class FireWorks extends Application implements MessageListener {
      *          The event sent by JavaFx when the user interface
      *          element for this method is invoked.
      */
+    @SuppressWarnings("unused")
     public final void displayTrashedRocketsTab(final Event event) {
         rocketTable.setItems(trashedRocketsList);
         numberRocketsLabel.textProperty().bind(
@@ -454,6 +459,7 @@ public class FireWorks extends Application implements MessageListener {
      *          The event sent by JavaFx when the user interface
      *          element for this method is invoked.
      */
+    @SuppressWarnings("unused")
     public final void displayProducedRocketsTab(final Event event) {
         rocketTable.setItems(rockets);
         numberRocketsLabel.textProperty().bind(
@@ -534,14 +540,23 @@ public class FireWorks extends Application implements MessageListener {
      * Close the program.
      */
     private void close() {
-        //consumer.close();
         System.out.println("Goodbye!");
     }
 
-    public static void main(String[] arguments) {
+    /**
+     * Start the fireworks factory.
+     *
+     * @param arguments
+     *          A list containing the command line arguments.
+     *
+     */
+    public static void main(final String[] arguments) {
         launch(arguments);
     }
 
+    /**
+     * Read old data from queues and initialize queues for the Ids.
+     */
     private void initListeners() {
         System.out.println("Set listeners to queues");
         try {
@@ -559,53 +574,52 @@ public class FireWorks extends Application implements MessageListener {
             Destination destination = (Destination) namingContext.lookup(
                     QueueDestinations.GUI_QUEUE);
 
-            consumer =
-                    connectionFactory.createContext(
-                            USERNAME, PASSWORD).createConsumer(
-                            destination);
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
 
             consumer.setMessageListener(this);
 
             JMSCommunication communicator = new JMSCommunication();
             // read the content of the storage queues
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_CASING_QUEUE)) {
                 changeCounterLabels((Casing) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_EFFECT_QUEUE)) {
                 changeCounterLabels((Effect) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_CLOSED_PROP_QUEUE)) {
                 changeCounterLabels((Propellant) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_OPENED_PROP_QUEUE)) {
                 changeCounterLabels((Propellant) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_WOOD_QUEUE)) {
                 changeCounterLabels((Wood) object);
             }
 
             // read the content of the rocket queues
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_PRODUCED_QUEUE)) {
                 updateOfARocketInRocketsTable((Rocket) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_TESTED_QUEUE)) {
                 updateOfARocketInRocketsTable((Rocket) object);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_SHIPPED_QUEUE)) {
                 RocketPackage rocketPackage = (RocketPackage) object;
-                for(Rocket rocket : rocketPackage.getRockets()) {
+                for (Rocket rocket : rocketPackage.getRockets()) {
                     updateOfARocketInRocketsTable(rocket);
                 }
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ROCKET_TRASHED_QUEUE)) {
                 updateOfARocketInRocketsTable((Rocket) object);
             }
@@ -613,7 +627,7 @@ public class FireWorks extends Application implements MessageListener {
             // Check with ids are in the queues and fill them so that each
             // contains 10 ids
             TreeSet<Integer> ids = new TreeSet<>();
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ID_ROCKET_QUEUE)) {
                 ids.add((Integer) object);
             }
@@ -627,12 +641,12 @@ public class FireWorks extends Application implements MessageListener {
                 first = 1;
                 last = 0;
             }
-            while ((last-first) < 9 ) {
+            while ((last - first) < IDS_QUEUES_INIT - 1) {
                 last++;
                 communicator.sendMessage(last,
                         QueueDestinations.ID_ROCKET_QUEUE);
             }
-            for(Object object : communicator.readMessagesInQueue(
+            for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.ID_PACKET_QUEUE)) {
                 ids.add((Integer) object);
             }
@@ -644,7 +658,7 @@ public class FireWorks extends Application implements MessageListener {
                 first = 1;
                 last = 0;
             }
-            while ((last-first) < 9 ) {
+            while ((last - first) < IDS_QUEUES_INIT - 1) {
                 last++;
                 communicator.sendMessage(last,
                         QueueDestinations.ID_PACKET_QUEUE);
@@ -668,7 +682,7 @@ public class FireWorks extends Application implements MessageListener {
     }
 
     @Override
-    public void onMessage(Message message) {
+    public final void onMessage(final Message message) {
         try {
             if (((ObjectMessage) message).getObject() instanceof Wood) {
                 changeCounterLabels(
@@ -679,19 +693,18 @@ public class FireWorks extends Application implements MessageListener {
                         (Effect) ((ObjectMessage) message).getObject());
             } else if (((ObjectMessage) message).getObject()
                     instanceof Propellant) {
-                Propellant propellant = (Propellant)
-                        ((ObjectMessage) message).getObject();
                 changeCounterLabels(
                         (Propellant) ((ObjectMessage) message).getObject());
             } else if (((ObjectMessage) message).getObject()
                     instanceof Casing) {
                 changeCounterLabels(
                         (Casing) ((ObjectMessage) message).getObject());
-            }else if (((ObjectMessage) message).getObject() instanceof Rocket) {
+            } else if (((ObjectMessage) message).getObject()
+                    instanceof Rocket) {
                 updateOfARocketInRocketsTable(
                         (Rocket) ((ObjectMessage) message).getObject());
-            } else if (((ObjectMessage) message).getObject() instanceof
-                    RocketPackage) {
+            } else if (((ObjectMessage) message).getObject()
+                    instanceof RocketPackage) {
                 ArrayList<Rocket> packedRockets = ((RocketPackage)
                         ((ObjectMessage) message).getObject()).getRockets();
                 for (Rocket rocket : packedRockets) {
@@ -705,7 +718,16 @@ public class FireWorks extends Application implements MessageListener {
         }
     }
 
-    public void clearOrder(ActionEvent actionEvent) {
+    /**
+     * Remove all suppliers from the supplier table.
+     *
+     * @param actionEvent
+     *          The event sent by JavaFx when the user interface
+     *          element for this method is invoked.
+     *
+     */
+    @SuppressWarnings("unused")
+    public final void clearOrder(final ActionEvent actionEvent) {
         order.clear();
     }
 }

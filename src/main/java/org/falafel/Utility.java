@@ -20,6 +20,8 @@ public final class Utility {
             "org.jboss.naming.remote.client.InitialContextFactory";
     /** The address of the JMS provider. */
     public static final String PROVIDER_URL = "http-remoting://127.0.0.1:8080";
+    /** The number of IDs initially stored in the queues. */
+    public static final int IDS_QUEUES_INIT = 10;
 
     /**
      * Let the current thread sleep for some time.

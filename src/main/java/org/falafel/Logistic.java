@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import static java.util.logging.Logger.getLogger;
+import static org.falafel.Utility.IDS_QUEUES_INIT;
 
 /**
  * This class represents a logistic worker.
@@ -108,7 +109,7 @@ public final class Logistic {
                     Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                     continue;
                 }
-                communicator.sendMessage(packageId + 10,
+                communicator.sendMessage(packageId + IDS_QUEUES_INIT,
                         QueueDestinations.ID_PACKET_QUEUE);
 
                 RocketPackage rocketPackage = new

@@ -1,6 +1,13 @@
 package org.falafel;
 
-import javax.jms.*;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -9,27 +16,29 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import static org.falafel.Utility.CONNECTION_FACTORY;
+import static org.falafel.Utility.USERNAME;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PROVIDER_URL;
+
 /**
- * .
+ * Receive and send messages via JMS.
  */
 public class JMSCommunication {
     /** Get the Logger for the current class. */
     private static final Logger LOGGER =
             Logger.getLogger(JMSCommunication.class.getName());
+    /** The time used to wait for one message from a certain queue. */
+    private static final int WAIT_TIME_MESSAGE_MS = 5000;
 
-    private static final String CONNECTION_FACTORY =
-            "jms/RemoteConnectionFactory";
-    private static final String USERNAME = "fireworks";
-    private static final String PASSWORD = "fireworks";
-    private static final String INITIAL_CONTEXT_FACTORY =
-            "org.jboss.naming.remote.client.InitialContextFactory";
-    private static final String PROVIDER_URL =
-            "http-remoting://127.0.0.1:8080";
-
+    /** The naming context used to lookup the JMS queues. */
     private Context namingContext;
+    /** The connection factory used for the JMS communication. */
     private ConnectionFactory connectionFactory;
 
-    public JMSCommunication () {
+    /** Create a new JMS communication. */
+    public JMSCommunication() {
         try {
             // Set up the namingContext for the JNDI lookup
             final Properties env = new Properties();
@@ -49,7 +58,7 @@ public class JMSCommunication {
     /**
      * Closes the communication with the server.
      */
-    public void closeCommunication () {
+    public final void closeCommunication() {
         if (namingContext != null) {
             try {
                 namingContext.close();
@@ -58,7 +67,16 @@ public class JMSCommunication {
             }
         }
     }
-    public void sendMessage(Integer msgId, String queue) {
+
+    /**
+     * Send a Integer value to a certain queue.
+     *
+     * @param msgId
+     *          The integer value that should be stored in the queue.
+     * @param queue
+     *          The name of the queue where the integer value should be stored.
+     */
+    public final void sendMessage(final Integer msgId, final String queue) {
         try {
             Destination destination = (Destination) namingContext.lookup(
                     queue);
@@ -72,7 +90,15 @@ public class JMSCommunication {
         }
     }
 
-    public void sendMessage(Rocket msgRocket, String queue) {
+    /**
+     * Send a Rocket object to a certain queue.
+     *
+     * @param msgRocket
+     *          The rocket that should be stored in the queue.
+     * @param queue
+     *          The name of the queue where the rocket should be stored.
+     */
+    public final void sendMessage(final Rocket msgRocket, final String queue) {
         try {
             Destination destination = (Destination) namingContext.lookup(
                     queue);
@@ -86,7 +112,16 @@ public class JMSCommunication {
         }
     }
 
-    public void sendMessage(Material msgMaterial, String queue) {
+    /**
+     * Send a Material object to a certain queue.
+     *
+     * @param msgMaterial
+     *          The material that should be stored in the queue.
+     * @param queue
+     *          The name of the queue where the material should be stored.
+     */
+    public final void sendMessage(final Material msgMaterial,
+                                  final String queue) {
         try {
             Destination destination = (Destination) namingContext.lookup(
                     queue);
@@ -100,7 +135,16 @@ public class JMSCommunication {
         }
     }
 
-    public void sendMessage(RocketPackage msgRocketPackage, String queue) {
+    /**
+     * Send a RocketPackage object to a certain queue.
+     *
+     * @param msgRocketPackage
+     *          The rocket package that should be stored in the queue.
+     * @param queue
+     *          The name of the queue where the rocket package should be stored.
+     */
+    public final void sendMessage(final RocketPackage msgRocketPackage,
+                                  final String queue) {
         try {
             Destination destination = (Destination) namingContext.lookup(
                     queue);
@@ -114,7 +158,16 @@ public class JMSCommunication {
         }
     }
 
-    public Object receiveMessage(String queue) {
+    /**
+     * Receive an object from a certain queue.
+     *
+     * @param queue
+     *          The name of the queue from which the object should be received.
+     * @return
+     *          The object stored in the queue or null if no message could be
+     *          received in time.
+     */
+    public final Object receiveMessage(final String queue) {
         Object text = null;
         try {
             Destination destination = (Destination) namingContext.lookup(
@@ -123,7 +176,7 @@ public class JMSCommunication {
             try (JMSContext context = connectionFactory.createContext(
                     USERNAME, PASSWORD)) {
                 JMSConsumer consumer = context.createConsumer(destination);
-                text = consumer.receiveBody(Object.class, 5000);
+                text = consumer.receiveBody(Object.class, WAIT_TIME_MESSAGE_MS);
             }
         } catch (NamingException e) {
             LOGGER.severe("Could not lookup destination!");
@@ -131,7 +184,16 @@ public class JMSCommunication {
         return text;
     }
 
-    public ArrayList<Object> readMessagesInQueue(String queue) {
+    /**
+     * Read all messages in a certain queue.
+     *
+     * @param queue
+     *          The name of the queue from which the objects should be received.
+     * @return
+     *          A ArrayList containing all messages stored in the specified
+     *          queue.
+     */
+    public final ArrayList<Object> readMessagesInQueue(final String queue) {
         ArrayList<Object> messages = new ArrayList<>();
         try (JMSContext context = connectionFactory.createContext(
                 USERNAME, PASSWORD)) {
