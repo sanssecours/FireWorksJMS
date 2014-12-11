@@ -7,6 +7,9 @@ package org.falafel;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -171,14 +174,21 @@ public class FireWorks extends Application implements MessageListener {
     private static StringProperty quantityOpenPropellantCounterProperty =
             new SimpleStringProperty(quantityOpenPropellantCounter.toString());
 
+    /** Displays the number of rockets in the current rocket table. */
     @FXML
     private Label numberRocketsLabel;
-    private static StringProperty numberRocketsProperty =
-            new SimpleStringProperty("0");
-    private static StringProperty numberShippedRocketsProperty =
-            new SimpleStringProperty("0");
-    private static StringProperty numberTrashedRocketsProperty =
-            new SimpleStringProperty("0");
+    /** The number of produced rockets. */
+    @FXML
+    private static IntegerProperty numberRocketsProperty =
+            new SimpleIntegerProperty(0);
+    /** The number of shipped rockets. */
+    @FXML
+    private static IntegerProperty numberShippedRocketsProperty =
+            new SimpleIntegerProperty(0);
+    /** The number of trashed rockets. */
+    @FXML
+    private static IntegerProperty numberTrashedRocketsProperty =
+            new SimpleIntegerProperty(0);
     private JMSConsumer consumer;
 
 
@@ -196,8 +206,8 @@ public class FireWorks extends Application implements MessageListener {
         casingIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getCasingIdProperty());
         propellantIdColumn.setCellValueFactory(
-                cellData
-                        -> cellData.getValue().getPropellantPackageIdProperty());
+                cellData ->
+                        cellData.getValue().getPropellantPackageIdProperty());
         woodIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getWoodIdProperty());
         effectIdColumn.setCellValueFactory(
@@ -232,7 +242,8 @@ public class FireWorks extends Application implements MessageListener {
                 numberOpenPropellantCounterProperty);
         quantityOpenPropellantLabel.textProperty().bind(
                 quantityOpenPropellantCounterProperty);
-        numberRocketsLabel.textProperty().bind(numberRocketsProperty);
+        numberRocketsLabel.textProperty().bind(
+                Bindings.convert(numberRocketsProperty));
 
         //  initialize supplier table
         supplierNameColumn.setCellValueFactory(
@@ -259,15 +270,6 @@ public class FireWorks extends Application implements MessageListener {
         orderedQualityColumn.isEditable();
 
         //CHECKSTYLE:OFF
-        /*
-        HashMap<Propellant, Integer> propellants = new HashMap<>();
-        propellants.put(new Propellant(4, "hugo", 1, org.falafel.Propellant.CLOSED), 100);
-        propellants.put(new Propellant(5, "hugo", 3, org.falafel.Propellant.CLOSED), 130);
-        ArrayList<Effect> effects = new ArrayList<>();
-        effects.add(new Effect(3, "Hannes", 3, false));
-        rockets.add(new Rocket(1, new Wood(1, "hugo", 100), new Casing(2, "Rene", 2),
-                effects, propellants, 130, 434));
-        */
         order.add(new SupplyOrder("Hulk", Casing.toString(), 50, 100));
         order.add(new SupplyOrder("Iron Man", Wood.toString(), 50, 100));
         order.add(new SupplyOrder("Captain America", Effect.toString(), 50, 100));
@@ -281,7 +283,7 @@ public class FireWorks extends Application implements MessageListener {
         supplyTable.setItems(order);
 
         rocketTable.setItems(rockets);
-        numberRocketsProperty.set(Integer.toString(rockets.size()));
+        numberRocketsProperty.set(rockets.size());
     }
 
     /**
@@ -393,17 +395,15 @@ public class FireWorks extends Application implements MessageListener {
             }
             if (!rocketInTable) {
                 rockets.add(updatedRocket);
-                numberRocketsProperty.set(Integer.toString(rockets.size()));
+                numberRocketsProperty.set(rockets.size());
             }
             if (updatedRocket.getPackerId() != 0) {
                 if (updatedRocket.getTestResult()) {
                     trashedRocketsList.add(updatedRocket);
-                    numberTrashedRocketsProperty.set(Integer.toString(
-                            trashedRocketsList.size()));
+                    numberTrashedRocketsProperty.set(trashedRocketsList.size());
                 } else {
                     packedRocketsList.add(updatedRocket);
-                    numberShippedRocketsProperty.set(Integer.toString(
-                            packedRocketsList.size()));
+                    numberShippedRocketsProperty.set(packedRocketsList.size());
                 }
             }
         });
@@ -430,7 +430,8 @@ public class FireWorks extends Application implements MessageListener {
      */
     public final void displayShippedRocketsTab(final Event event) {
         rocketTable.setItems(packedRocketsList);
-        numberRocketsLabel.textProperty().bind(numberShippedRocketsProperty);
+        numberRocketsLabel.textProperty().bind(
+                Bindings.convert(numberShippedRocketsProperty));
     }
 
     /**
@@ -442,7 +443,8 @@ public class FireWorks extends Application implements MessageListener {
      */
     public final void displayTrashedRocketsTab(final Event event) {
         rocketTable.setItems(trashedRocketsList);
-        numberRocketsLabel.textProperty().bind(numberTrashedRocketsProperty);
+        numberRocketsLabel.textProperty().bind(
+                Bindings.convert(numberTrashedRocketsProperty));
     }
 
     /**
@@ -454,7 +456,8 @@ public class FireWorks extends Application implements MessageListener {
      */
     public final void displayProducedRocketsTab(final Event event) {
         rocketTable.setItems(rockets);
-        numberRocketsLabel.textProperty().bind(numberRocketsProperty);
+        numberRocketsLabel.textProperty().bind(
+                Bindings.convert(numberRocketsProperty));
     }
 
     /**
