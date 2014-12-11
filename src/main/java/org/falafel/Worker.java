@@ -15,6 +15,11 @@ import java.util.logging.Logger;
 
 import static java.util.logging.Logger.getLogger;
 import static org.falafel.Utility.sleep;
+import static org.falafel.Utility.CONNECTION_FACTORY;
+import static org.falafel.Utility.USERNAME;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PROVIDER_URL;
 
 /**
  * This class represents a worker. A worker collects materials and uses them
@@ -45,18 +50,6 @@ public final class Worker {
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(Worker.class.getName());
 
-    /** The connection factory to the JMS provider. */
-    private static final String CONNECTION_FACTORY =
-            "jms/RemoteConnectionFactory";
-    /** The user name used to connect to the JMS provider. */
-    private static final String USERNAME = "fireworks";
-    /** The password for {@code USERNAME}.*/
-    private static final String PASSWORD = "fireworks";
-    /** The address of the initial context factory. */
-    private static final String INITIAL_CONTEXT_FACTORY =
-            "org.jboss.naming.remote.client.InitialContextFactory";
-    /** The address of the JMS provider. */
-    private static final String PROVIDER_URL = "http-remoting://127.0.0.1:8080";
     /** The naming context used to lookup the JMS queues. */
     private static Context namingContext;
 

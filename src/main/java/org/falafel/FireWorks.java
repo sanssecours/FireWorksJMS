@@ -24,7 +24,13 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
-import javax.jms.*;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -38,19 +44,21 @@ import static org.falafel.MaterialType.Casing;
 import static org.falafel.MaterialType.Effect;
 import static org.falafel.MaterialType.Propellant;
 import static org.falafel.MaterialType.Wood;
+import static org.falafel.Utility.CONNECTION_FACTORY;
+import static org.falafel.Utility.USERNAME;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PROVIDER_URL;
 
+/**
+ * Main class for the project. This class provides an interface to start
+ * suppliers and keep an eye on the progress of the production in the firework
+ * factory.
+ */
 public class FireWorks extends Application implements MessageListener {
+    /** The Logger for the current class. */
     private static final Logger LOGGER =
             Logger.getLogger(FireWorks.class.getName());
-
-    private static final String CONNECTION_FACTORY =
-            "jms/RemoteConnectionFactory";
-    private static final String USERNAME = "fireworks";
-    private static final String PASSWORD = "fireworks";
-    private static final String INITIAL_CONTEXT_FACTORY =
-            "org.jboss.naming.remote.client.InitialContextFactory";
-    private static final String PROVIDER_URL =
-            "http-remoting://127.0.0.1:8080";
 
     /** The running id for the suppliers. */
     private static int supplierId = 1;
