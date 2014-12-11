@@ -34,20 +34,30 @@ public final class Worker {
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** How many effect charges are needed to build a rocket. */
     private static final int NUMBER_EFFECTS_NEEDED = 3;
+    /** Specifies how many ids are stored in the queue for ids at the program
+     *  start. */
+    private static final int NUMBER_INITIAL_IDS = 10;
     /** Specifies how long a worker waits until he tries to get new material
      *  after he failed the last time. */
     private static final int WAIT_TIME_WORKER_MS = 2000;
+    /** The time used to wait for one message from a certain queue. */
+    private static final int WAIT_TIME_MESSAGE_MS = 5000;
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(Worker.class.getName());
 
+    /** The connection factory to the JMS provider. */
     private static final String CONNECTION_FACTORY =
             "jms/RemoteConnectionFactory";
+    /** The user name used to connect to the JMS provider. */
     private static final String USERNAME = "fireworks";
+    /** The password for {@code USERNAME}.*/
     private static final String PASSWORD = "fireworks";
+    /** The address of the initial context factory. */
     private static final String INITIAL_CONTEXT_FACTORY =
             "org.jboss.naming.remote.client.InitialContextFactory";
-    private static final String PROVIDER_URL =
-            "http-remoting://127.0.0.1:8080";
+    /** The address of the JMS provider. */
+    private static final String PROVIDER_URL = "http-remoting://127.0.0.1:8080";
+    /** The naming context used to lookup the JMS queues. */
     private static Context namingContext;
 
     /** Specifies if we want to terminate the program. This variable will be
@@ -141,7 +151,8 @@ public final class Worker {
                     USERNAME, PASSWORD, JMSContext.SESSION_TRANSACTED)) {
                 JMSConsumer consumerWood = context.createConsumer(
                         destinationWood);
-                wood = consumerWood.receiveBody(Wood.class, 5000);
+                wood = consumerWood.receiveBody(Wood.class,
+                        WAIT_TIME_MESSAGE_MS);
                 if (wood == null) {
                     context.rollback();
                     LOGGER.info("could not get wood");
@@ -151,7 +162,8 @@ public final class Worker {
 
                 JMSConsumer consumerCasing = context.createConsumer(
                         destinationCasing);
-                casing = consumerCasing.receiveBody(Casing.class, 5000);
+                casing = consumerCasing.receiveBody(Casing.class,
+                        WAIT_TIME_MESSAGE_MS);
                 if (casing == null) {
                     context.rollback();
                     LOGGER.info("could not get casings");
@@ -163,7 +175,7 @@ public final class Worker {
                         destinationEffect);
                 for (int index = 0; index < NUMBER_EFFECTS_NEEDED; index++) {
                     Effect effect = consumerEffect.receiveBody(
-                            Effect.class, 5000);
+                            Effect.class, WAIT_TIME_MESSAGE_MS);
                     if (effect != null) {
                         effects.add(effect);
                     }
@@ -186,8 +198,8 @@ public final class Worker {
                             context.createConsumer(destinationOpenedPropellant);
                     Propellant propellant =
                             consumerOpenedPropellant.receiveBody(
-                                    Propellant.class, 5000);
-                    if(propellant != null) {
+                                    Propellant.class, WAIT_TIME_MESSAGE_MS);
+                    if (propellant != null) {
                         int currentQuantity = propellant.getQuantity();
                         if (currentQuantity >= missingQuantity) {
                             // Done with rocket
@@ -208,7 +220,7 @@ public final class Worker {
                                         destinationClosedPropellant);
                         Propellant closedPropellant =
                                 consumerClosedPropellant.receiveBody(
-                                        Propellant.class, 5000);
+                                        Propellant.class, WAIT_TIME_MESSAGE_MS);
                         if (closedPropellant != null) {
                             quantity = quantity + missingQuantity;
                             propellantsWithQuantity.put(closedPropellant,
@@ -226,7 +238,8 @@ public final class Worker {
                 // get an id for the rocket from the queue
                 JMSConsumer consumerRocketId = context.createConsumer(
                         destinationRocketId);
-                rocketId = consumerRocketId.receiveBody(Integer.class, 5000);
+                rocketId = consumerRocketId.receiveBody(Integer.class,
+                        WAIT_TIME_MESSAGE_MS);
                 if (rocketId == null) {
                     context.rollback();
                     LOGGER.severe("Could not get an rocket id!");
@@ -236,7 +249,7 @@ public final class Worker {
                 context.commit();
             }
             // write a new rocket id in the queue for the taken one
-            communicator.sendMessage(rocketId + 10,
+            communicator.sendMessage(rocketId + NUMBER_INITIAL_IDS,
                     QueueDestinations.ID_ROCKET_QUEUE);
 
             //write to GUI what was taken
