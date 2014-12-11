@@ -17,6 +17,9 @@ compile:
 	mvn compile
 
 test: compile
+	# Remove old data
+	rm -rf /usr/local/Cellar/wildfly-as/8.2.0.Final/libexec/standalone/data
+
 	# Start server
 	standalone.sh -c standalone-full.xml&
 
