@@ -75,7 +75,8 @@ public class Supplier extends Thread {
             } else if (orderType.equals(effect)) {
                 defect = index >= functioningElements;
                 newEntry = new Effect(materialId, orderSupplier, id, defect);
-                destinationStorage = QueueDestinations.STORAGE_EFFECT_QUEUE;
+                //TODO
+                destinationStorage = QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE;
             } else if (orderType.equals(propellant)) {
                 newEntry = new Propellant(materialId, orderSupplier, id,
                         Propellant.CLOSED);

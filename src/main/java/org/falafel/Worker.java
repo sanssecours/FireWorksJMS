@@ -116,8 +116,9 @@ public final class Worker {
         try {
             destinationWood = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_WOOD_QUEUE);
+            //TODO
             destinationEffect = (Destination) namingContext.lookup(
-                    QueueDestinations.STORAGE_EFFECT_QUEUE);
+                    QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE);
             destinationCasing = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_CASING_QUEUE);
             destinationOpenedPropellant = (Destination) namingContext.lookup(

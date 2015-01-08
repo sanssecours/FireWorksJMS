@@ -586,8 +586,9 @@ public class FireWorks extends Application implements MessageListener {
                     QueueDestinations.STORAGE_CASING_QUEUE)) {
                 changeCounterLabels((Casing) object);
             }
+            //TODO
             for (Object object : communicator.readMessagesInQueue(
-                    QueueDestinations.STORAGE_EFFECT_QUEUE)) {
+                    QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE)) {
                 changeCounterLabels((Effect) object);
             }
             for (Object object : communicator.readMessagesInQueue(

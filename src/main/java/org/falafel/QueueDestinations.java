@@ -23,9 +23,15 @@ public final class QueueDestinations {
     /** Queue to store the ordered casings. */
     public static final String STORAGE_CASING_QUEUE =
             "jms/queue/storage/casings";
-    /** Queue to store the ordered effects. */
-    public static final String STORAGE_EFFECT_QUEUE =
-            "jms/queue/storage/effects";
+    /** Queue to store the ordered blue effects. */
+    public static final String STORAGE_BLUE_EFFECT_QUEUE =
+            "jms/queue/storage/effects/blue";
+    /** Queue to store the ordered green effects. */
+    public static final String STORAGE_GREEN_EFFECT_QUEUE =
+            "jms/queue/storage/effects/green";
+    /** Queue to store the ordered red effects. */
+    public static final String STORAGE_RED_EFFECT_QUEUE =
+            "jms/queue/storage/effects/red";
 
     /** Queue for GUI updates. */
     public static final String GUI_QUEUE = "jms/queue/gui";
