@@ -9,12 +9,16 @@ jms-queue add --queue-address=ClosedPropQueue --entries=queue/storage/propellant
 jms-queue add --queue-address=OpenedPropQueue --entries=queue/storage/propellants/opened,java:jboss/exported/jms/queue/storage/propellants/opened
 jms-queue add --queue-address=WoodQueue --entries=queue/storage/wood,java:jboss/exported/jms/queue/storage/wood
 jms-queue add --queue-address=CasingQueue --entries=queue/storage/casings,java:jboss/exported/jms/queue/storage/casings
-jms-queue add --queue-address=EffectQueue --entries=queue/storage/effects,java:jboss/exported/jms/queue/storage/effects
+jms-queue add --queue-address=BlueEffectQueue --entries=queue/storage/effects/blue,java:jboss/exported/jms/queue/storage/effects/blue
+jms-queue add --queue-address=GreenEffectQueue --entries=queue/storage/effects/green,java:jboss/exported/jms/queue/storage/effects/green
+jms-queue add --queue-address=RedEffectQueue --entries=queue/storage/effects/red,java:jboss/exported/jms/queue/storage/effects/red
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.ClosedPropQueue/:add(max-delivery-attempts=-1)
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OpenedPropQueue/:add(max-delivery-attempts=-1)
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.WoodQueue/:add(max-delivery-attempts=-1)
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.CasingQueue/:add(max-delivery-attempts=-1)
-/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.EffectQueue/:add(max-delivery-attempts=-1)
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BlueEffectQueue/:add(max-delivery-attempts=-1)
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.GreenEffectQueue/:add(max-delivery-attempts=-1)
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.RedEffectQueue/:add(max-delivery-attempts=-1)
 
 jms-queue add --queue-address=GUIQueue --entries=queue/gui,java:jboss/exported/jms/queue/gui
 
