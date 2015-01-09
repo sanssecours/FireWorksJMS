@@ -54,6 +54,7 @@ public class Effect extends Material {
      * @return A string containing properties of this effect charge
      */
     public final String toString() {
-        return "Effect: " + super.toString() + " -- Defect: " + defect;
+        return "Effect: " + super.toString() + " -- Defect: " + defect
+                + " -- Color: " + color.toString();
     }
 }

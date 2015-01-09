@@ -21,6 +21,8 @@ public final class QualityTester {
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** Constant for the minimum.*/
     private static final int MINIMAL_PROPELLANT = 120;
+    /** Constant for the minimum propellant to be class A.*/
+    private static final Integer MINIMAL_PROP_CLASS_A = 130;
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(
             QualityTester.class.getName());
@@ -76,12 +78,15 @@ public final class QualityTester {
                     defectCount++;
                 }
             }
-//            if (defectCount > 1 || rocket.getPropellantQuantity()
-//                                                    < MINIMAL_PROPELLANT) {
-//                rocket.setTestResult(true);
-//            } else {
-//                rocket.setTestResult(false);
-//            }
+            if (defectCount > 1 || rocket.getPropellantQuantity()
+                    < MINIMAL_PROPELLANT) {
+                rocket.setQualityClassBad();
+            } else if (defectCount == 0 && rocket.getPropellantQuantity()
+                    >= MINIMAL_PROP_CLASS_A) {
+                rocket.setQualityClassA();
+            } else {
+                rocket.setQualityClassB();
+            }
 
             rocket.setTester(testerId);
 
