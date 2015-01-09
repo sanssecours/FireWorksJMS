@@ -8,6 +8,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
@@ -72,6 +73,8 @@ public final class Worker {
         int workerId;
         Wood wood;
         Casing casing;
+        long startTime = 0;
+        long endTime = 0;
         ArrayList<Effect> effects = new ArrayList<>();
         HashMap<Propellant, Integer> propellantsWithQuantity;
         Integer rocketId;
@@ -108,7 +111,9 @@ public final class Worker {
             return;
         }
         Destination destinationWood;
-        Destination destinationEffect;
+        Destination destinationEffectBlue;
+        Destination destinationEffectGreen;
+        Destination destinationEffectRed;
         Destination destinationCasing;
         Destination destinationOpenedPropellant;
         Destination destinationClosedPropellant;
@@ -116,9 +121,12 @@ public final class Worker {
         try {
             destinationWood = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_WOOD_QUEUE);
-            //TODO
-            destinationEffect = (Destination) namingContext.lookup(
+            destinationEffectBlue = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE);
+            destinationEffectGreen = (Destination) namingContext.lookup(
+                    QueueDestinations.STORAGE_GREEN_EFFECT_QUEUE);
+            destinationEffectRed = (Destination) namingContext.lookup(
+                    QueueDestinations.STORAGE_RED_EFFECT_QUEUE);
             destinationCasing = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_CASING_QUEUE);
             destinationOpenedPropellant = (Destination) namingContext.lookup(
@@ -145,8 +153,7 @@ public final class Worker {
                     USERNAME, PASSWORD, JMSContext.SESSION_TRANSACTED)) {
                 JMSConsumer consumerWood = context.createConsumer(
                         destinationWood);
-                wood = consumerWood.receiveBody(Wood.class,
-                        WAIT_TIME_MESSAGE_MS);
+                wood = consumerWood.receiveBodyNoWait(Wood.class);
                 if (wood == null) {
                     context.rollback();
                     LOGGER.info("could not get wood");
@@ -156,8 +163,7 @@ public final class Worker {
 
                 JMSConsumer consumerCasing = context.createConsumer(
                         destinationCasing);
-                casing = consumerCasing.receiveBody(Casing.class,
-                        WAIT_TIME_MESSAGE_MS);
+                casing = consumerCasing.receiveBodyNoWait(Casing.class);
                 if (casing == null) {
                     context.rollback();
                     LOGGER.info("could not get casings");
@@ -165,15 +171,40 @@ public final class Worker {
                     continue;
                 }
 
-                JMSConsumer consumerEffect = context.createConsumer(
-                        destinationEffect);
-                for (int index = 0; index < NUMBER_EFFECTS_NEEDED; index++) {
-                    Effect effect = consumerEffect.receiveBody(
-                            Effect.class, WAIT_TIME_MESSAGE_MS);
+                ArrayList<EffectColor> randomColors = new ArrayList<>(
+                        Arrays.asList(EffectColor.Blue, EffectColor.Green,
+                                EffectColor.Red));
+                JMSConsumer consumerEffect;
+                while (randomColors.size() > 0 && effects.size()
+                                                    < NUMBER_EFFECTS_NEEDED) {
+                    int randomColor = randomGenerator.nextInt(
+                            randomColors.size());
+                    switch (randomColors.get(randomColor)) {
+                        case Blue:
+                            consumerEffect = context.createConsumer(
+                                    destinationEffectBlue);
+                            break;
+                        case Green:
+                            consumerEffect = context.createConsumer(
+                                    destinationEffectGreen);
+                            break;
+                        case Red:
+                            consumerEffect = context.createConsumer(
+                                    destinationEffectRed);
+                            break;
+                        default:
+                            consumerEffect = context.createConsumer(
+                                destinationEffectBlue);
+                    }
+
+                    Effect effect = consumerEffect.receiveBodyNoWait(Effect.class);
                     if (effect != null) {
                         effects.add(effect);
+                    } else {
+                        randomColors.remove(randomColor);
                     }
                 }
+
                 if (effects.size() != NUMBER_EFFECTS_NEEDED) {
                     context.rollback();
                     LOGGER.info("could not get all effects. Got: " + effects);
@@ -181,6 +212,7 @@ public final class Worker {
                     continue;
                 }
 
+                startTime = System.currentTimeMillis();
                 propellantQuantity = randomGenerator.nextInt(
                         UPPER_QUANTITY - LOWER_QUANTITY) + LOWER_QUANTITY;
                 int quantity = 0;
@@ -191,8 +223,8 @@ public final class Worker {
                     JMSConsumer consumerOpenedPropellant =
                             context.createConsumer(destinationOpenedPropellant);
                     Propellant propellant =
-                            consumerOpenedPropellant.receiveBody(
-                                    Propellant.class, WAIT_TIME_MESSAGE_MS);
+                            consumerOpenedPropellant.receiveBodyNoWait(
+                                    Propellant.class);
                     if (propellant != null) {
                         int currentQuantity = propellant.getQuantity();
                         if (currentQuantity >= missingQuantity) {
@@ -213,8 +245,8 @@ public final class Worker {
                                 context.createConsumer(
                                         destinationClosedPropellant);
                         Propellant closedPropellant =
-                                consumerClosedPropellant.receiveBody(
-                                        Propellant.class, WAIT_TIME_MESSAGE_MS);
+                                consumerClosedPropellant.receiveBodyNoWait(
+                                        Propellant.class);
                         if (closedPropellant != null) {
                             quantity = quantity + missingQuantity;
                             propellantsWithQuantity.put(closedPropellant,
@@ -232,8 +264,7 @@ public final class Worker {
                 // get an id for the rocket from the queue
                 JMSConsumer consumerRocketId = context.createConsumer(
                         destinationRocketId);
-                rocketId = consumerRocketId.receiveBody(Integer.class,
-                        WAIT_TIME_MESSAGE_MS);
+                rocketId = consumerRocketId.receiveBodyNoWait(Integer.class);
                 if (rocketId == null) {
                     context.rollback();
                     LOGGER.severe("Could not get an rocket id!");
@@ -241,7 +272,10 @@ public final class Worker {
                     continue;
                 }
                 context.commit();
+
+                endTime = System.currentTimeMillis();
             }
+
             // write a new rocket id in the queue for the taken one
             communicator.sendMessage(rocketId + NUMBER_INITIAL_IDS,
                     QueueDestinations.ID_ROCKET_QUEUE);
@@ -260,6 +294,10 @@ public final class Worker {
                 communicator.sendMessage(propellant,
                         QueueDestinations.GUI_QUEUE);
             }
+
+            long duration = (endTime - startTime);
+            System.out.println("Time for collectiing resources: "
+                    + duration);
             // The time needed to produce a rocket
             int waitingTime = randomGenerator.nextInt(
                     UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;

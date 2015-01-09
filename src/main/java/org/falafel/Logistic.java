@@ -65,7 +65,7 @@ public final class Logistic {
                 // put not packed rockets back
                 for (Rocket returnRocket : functioningRockets) {
                     returnRocket.setPackerId(0);
-                    returnRocket.setReadyForCollection(false);
+//                    returnRocket.setReadyForCollection(false);
                     communicator.sendMessage(returnRocket,
                             QueueDestinations.ROCKET_TESTED_QUEUE);
                     communicator.sendMessage(returnRocket,
@@ -77,17 +77,17 @@ public final class Logistic {
             }
 
             rocket.setPackerId(packerId);
-            rocket.setReadyForCollection(true);
+//            rocket.setReadyForCollection(true);
 
             // trash rocket if its defect
-            if (rocket.getTestResult()) {
-                communicator.sendMessage(rocket,
-                        QueueDestinations.ROCKET_TRASHED_QUEUE);
-                communicator.sendMessage(rocket,
-                        QueueDestinations.GUI_QUEUE);
-            } else {
-                functioningRockets.add(rocket);
-            }
+//            if (rocket.getTestResult()) {
+//                communicator.sendMessage(rocket,
+//                        QueueDestinations.ROCKET_TRASHED_QUEUE);
+//                communicator.sendMessage(rocket,
+//                        QueueDestinations.GUI_QUEUE);
+//            } else {
+//                functioningRockets.add(rocket);
+//            }
 
             if (functioningRockets.size() == PACKAGE_SIZE) {
                 // get an id and write a new on in the queue
@@ -99,7 +99,7 @@ public final class Logistic {
                     // put not packet rockets back
                     for (Rocket returnRocket : functioningRockets) {
                         returnRocket.setPackerId(0);
-                        returnRocket.setReadyForCollection(false);
+//                        returnRocket.setReadyForCollection(false);
                         communicator.sendMessage(returnRocket,
                                 QueueDestinations.ROCKET_TESTED_QUEUE);
                         communicator.sendMessage(returnRocket,

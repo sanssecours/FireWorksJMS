@@ -16,26 +16,61 @@ import java.util.TreeSet;
  */
 public class Rocket implements Serializable {
 
-    Integer id = 0;
-    Integer packageId = 0;
-    Wood wood;
-    Casing casing;
-    ArrayList<Effect> effects;
-    HashMap<Propellant, Integer> propellants;
-    Integer propellantQuantity;
-    Integer workerId;
-    Integer testerId = 0;
-    Integer packerId = 0;
-    Boolean testResult = false;
-    Boolean readyForCollection = false;
+    /** The different classes of the rocket. */
+    public enum QualityClass { A, B, NotSet, Bad }
+    /** The identification of this rocket. */
+    private Integer id;
+    /** The id of the package that contains this rocket. */
+    private Integer packageId = 0;
+    /** The wood used to construct this rocket. */
+    private Wood wood;
+    /** The casing used to construct this rocket. */
+    private Casing casing;
+    /** The list of effects used to construct this rocket. */
+    private ArrayList<Effect> effects;
+    /** The propellants together with the amounts of them used to create this
+     *  rocket. */
+    private HashMap<Propellant, Integer> propellants;
+    /** The whole amount of propellant used to create this rocket. */
+    private Integer propellantQuantity;
+    /** The id of the worker that put together this rocket. */
+    private Integer workerId;
+    /** The id of the tester that checked this rocket. */
+    private Integer testerId = 0;
+    /** The id of the logistician that boxed this rocket. */
+    private Integer packerId = 0;
+    /** This value specifies if this rocket is defect or not. */
+    //private Boolean testResult = false;
+    /** The id of the purchase order. */
+    private Purchase purchase = null;
+    /** The class of the rocket. */
+    private QualityClass qualityClass = QualityClass.NotSet;
 
-    public Rocket (Integer rocketId,
-                   Wood wood,
-                   Casing casing,
-                   ArrayList<Effect> effects,
-                   HashMap<Propellant, Integer> propellants,
-                   Integer propellantQuantity,
-                   Integer workerId) {
+    /**
+     * Create a new rocket with the given arguments.
+     *
+     * @param rocketId
+     *          The identifier for the rocket
+     * @param wood
+     *          The wood used to construct the new rocket
+     * @param casing
+     *          The casing used to construct the new rocket
+     * @param effects
+     *          A list of effects used to create the new rocket
+     * @param propellants
+     *          The propellants used to create the new rocket
+     * @param propellantQuantity
+     *          The amount of propellant contained in the new rocket
+     * @param workerId
+     *          The id of the worker that created the new rocket
+     */
+    public Rocket(final Integer rocketId,
+                    final Wood wood,
+                    final Casing casing,
+                    final ArrayList<Effect> effects,
+                    final HashMap<Propellant, Integer> propellants,
+                    final Integer propellantQuantity,
+                    final Integer workerId) {
         id = rocketId;
         this.wood = wood;
         this.casing = casing;
@@ -43,6 +78,39 @@ public class Rocket implements Serializable {
         this.propellants = propellants;
         this.propellantQuantity = propellantQuantity;
         this.workerId = workerId;
+    }
+
+    /**
+     * Create a new rocket with the given arguments.
+     *
+     * @param rocketId
+     *          The identifier for the rocket
+     * @param wood
+     *          The wood used to construct the new rocket
+     * @param casing
+     *          The casing used to construct the new rocket
+     * @param effects
+     *          A list of effects used to create the new rocket
+     * @param propellants
+     *          The propellants used to create the new rocket
+     * @param propellantQuantity
+     *          The amount of propellant contained in the new rocket
+     * @param workerId
+     *          The id of the worker that created the new rocket
+     * @param purchase
+     *          The purchase for which the rockets is produced
+     */
+    public Rocket(final Integer rocketId,
+                  final Wood wood,
+                  final Casing casing,
+                  final ArrayList<Effect> effects,
+                  final HashMap<Propellant, Integer> propellants,
+                  final Integer propellantQuantity,
+                  final Integer workerId,
+                  final Purchase purchase) {
+        this(rocketId, wood, casing, effects, propellants, propellantQuantity,
+                workerId);
+        this.purchase = purchase;
     }
     /**
      * Returns the id of the rocket.
@@ -101,14 +169,21 @@ public class Rocket implements Serializable {
         ArrayList<String> returnString = new ArrayList<>();
         for (Effect effect : effects) {
             returnString.add(Integer.toString(effect.getID()));
-            returnString.add(Boolean.toString(effect.getStatus()));
+            returnString.add(effect.getColor().toString());
+            if (testerId == 0) {
+                returnString.add("not tested");
+            } else if (effect.getStatus()) {
+                returnString.add("defect");
+            } else {
+                returnString.add("ok");
+            }
         }
         return new SimpleStringProperty(returnString.toString());
     }
     /**
      * Returns the quantity used in the rocket.
      *
-     * @return Returns the propellant quantity as StringProperty.
+     * @return Returns the propellant quantity as IntegerProperty.
      */
     public final IntegerProperty getPropellantQuantityProperty() {
         return new SimpleIntegerProperty(propellantQuantity);
@@ -119,12 +194,12 @@ public class Rocket implements Serializable {
      * @return Returns the test result of the quality test as StringProperty.
      */
     public final StringProperty getTestResultProperty() {
-        return new SimpleStringProperty(Boolean.toString(testResult));
+        return new SimpleStringProperty(qualityClass.toString());
     }
     /**
      * Returns the the id of the worker who built the rocket.
      *
-     * @return Returns the worker id as StringProperty.
+     * @return Returns the worker id as IntegerProperty.
      */
     public final IntegerProperty getWorkerIdProperty() {
         return new SimpleIntegerProperty(workerId);
@@ -132,7 +207,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the the id of the quality tester who tested the rocket.
      *
-     * @return Returns the tester id as StringProperty.
+     * @return Returns the tester id as IntegerProperty.
      */
     public final IntegerProperty getTesterIdProperty() {
         return new SimpleIntegerProperty(testerId);
@@ -140,7 +215,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the the id of the logistician who packed up the rocket.
      *
-     * @return Returns the logistician id as StringProperty.
+     * @return Returns the logistician id as IntegerProperty.
      */
     public final IntegerProperty getPackerIdProperty() {
         return new SimpleIntegerProperty(packerId);
@@ -148,7 +223,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the the id of the supplier who delivered the used wood.
      *
-     * @return Returns the supplier of the wood id as StringProperty.
+     * @return Returns the supplier of the wood id as IntegerProperty.
      */
     public final IntegerProperty getSupplierWoodIdProperty() {
         return new SimpleIntegerProperty(wood.getSupplierId());
@@ -156,7 +231,7 @@ public class Rocket implements Serializable {
     /**
      * Returns the the id of the supplier who delivered the used casing.
      *
-     * @return Returns the supplier of the casing id as StringProperty.
+     * @return Returns the supplier of the casing id as IntegerProperty.
      */
     public final IntegerProperty getSupplierCasingIdProperty() {
         return new SimpleIntegerProperty(casing.getSupplierId());
@@ -214,12 +289,22 @@ public class Rocket implements Serializable {
         return effects;
     }
     /**
-     * Set the result of quality test.
-     *
-     * @param result of the quality test as boolean
+     * Set the result of quality test to class A.
      */
-    public final void setTestResult(final boolean result) {
-        testResult = result;
+    public final void setQualityClassA() {
+        qualityClass = QualityClass.A;
+    }
+    /**
+     * Set the result of quality test to class B.
+     */
+    public final void setQualityClassB() {
+        qualityClass = QualityClass.B;
+    }
+    /**
+     * Set the result of quality test to class B.
+     */
+    public final void setQualityClassBad() {
+        qualityClass = QualityClass.Bad;
     }
     /**
      * Return the quantity of the propellant charges of the rocket.
@@ -232,10 +317,10 @@ public class Rocket implements Serializable {
     /**
      * returning the result of the quality test.
      *
-     * @return bollean value of the test result
+     * @return boolean value of the test result
      */
-    public final Boolean getTestResult() {
-        return testResult;
+    public final QualityClass getTestResult() {
+        return qualityClass;
     }
     /**
      * sets the id of the quality tester who tested the rocket.
@@ -254,14 +339,6 @@ public class Rocket implements Serializable {
         this.packerId = packerId;
     }
     /**
-     * Get the id of the worker who packed the rocket in logistics.
-     *
-     * @return packerId the id for the packer of the rocket
-     */
-    public final Integer getPackerId() {
-        return packerId;
-    }
-    /**
      * Set the id of the package containing the rocket.
      *
      * @param id of the package
@@ -269,14 +346,55 @@ public class Rocket implements Serializable {
     public final void setPackageId(final Integer id) {
         packageId = id;
     }
+
     /**
-     * Set if the rocket is finished and ready to collect.
+     * Get the IntegerProperty of the purchase order or 0 if its a random
+     * rocket.
      *
-     * @param readyForCollection flag which tells that the rocket is finished
+     * @return purchase id if the rocket is part of a purchase
      */
-    public final void setReadyForCollection(final boolean readyForCollection) {
-        this.readyForCollection = readyForCollection;
+    public final IntegerProperty getPurchaseIdProperty() {
+        if (purchase == null) {
+            return new SimpleIntegerProperty(0);
+        } else {
+            return purchase.getPurchaseId();
+
+        }
     }
+    /**
+     * Get the IntegerProperty of the purchase order or 0 if its a random
+     * rocket.
+     *
+     * @return purchase id if the rocket is part of a purchase
+     */
+    public final IntegerProperty getPurchaseBuyerIdProperty() {
+        if (purchase == null) {
+            return new SimpleIntegerProperty(0);
+        } else {
+            return purchase.getBuyerId();
+
+        }
+    }
+
+    /**
+     * Get the purchase of the rocket.
+     *
+     * @return the purchase or null if the rocket was not built for a purchase
+     */
+    public final Purchase getPurchase() {
+        return purchase;
+    }
+
+    /**
+     * Set the purchase of the rocket.
+     *
+     * @param purchase
+     *          the new purchase of the rocket.
+     */
+    public final void setPurchase(final Purchase purchase) {
+        this.purchase = purchase;
+    }
+
     /**
      * Return the string representation of the rocket.
      *
@@ -286,4 +404,12 @@ public class Rocket implements Serializable {
         return "Rocket Id: " + id;
     }
 
+    /**
+     * Get the id of the logistician who packed the rocket.
+     *
+     * @return the packer id.
+     */
+    public final Integer getPackerId() {
+        return packerId;
+    }
 }

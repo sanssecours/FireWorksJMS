@@ -73,6 +73,9 @@ public class FireWorks extends Application implements MessageListener {
     /**  The data as an observable list for SupplyOrder. */
     private static ObservableList<SupplyOrder> order =
             FXCollections.observableArrayList();
+    /**  The data as an observable list for purchases. */
+    private static ObservableList<Purchase> purchases =
+            FXCollections.observableArrayList();
 
     /**  The data as an observable list for rockets. */
     private static ObservableList<Rocket> rockets =
@@ -91,6 +94,23 @@ public class FireWorks extends Application implements MessageListener {
                     Effect.toString(),
                     Propellant.toString(),
                     Wood.toString());
+    /** Specify the different choices for the color of an effect. */
+    private static final ObservableList<String> EFFECT_COLOR_CHOICE_LIST =
+            FXCollections.observableArrayList(EffectColor.Blue.toString(),
+                    EffectColor.Green.toString(), EffectColor.Red.toString());
+
+    /** Table for the purchase orders. */
+    @FXML
+    private TableView<Purchase> purchaseTable;
+    /** Save data shown in the purchase table. */
+    @FXML
+    private TableColumn<Purchase, Number> purchaseBuyerIdColumn,
+            purchaseIdColumn, purchaseNumberOrderedColumn,
+            purchaseNumberProducedColumn;
+    /** Save data shown in the purchase table. */
+    @FXML
+    private TableColumn<Purchase, String> purchaseStatusColumn,
+            purchaseStorageAddressColumn, purchaseEffectColors;
 
     /** Save data shown in the rocket table. */
     @FXML
@@ -102,7 +122,8 @@ public class FireWorks extends Application implements MessageListener {
     private TableColumn<Rocket, Number> rocketIdColumn, casingIdColumn,
             packageIdColumn, woodIdColumn, propellantQuantityColumn,
             workerIdColumn, testerIdColumn, supplierWoodIdColumn,
-            supplierCasingIdColumn, packerIdColumn;
+            supplierCasingIdColumn, packerIdColumn, purchaseIdRocketColumn,
+            buyerIdColumn;
 
     /** Save handler of the rocket table. */
     @FXML
@@ -124,14 +145,35 @@ public class FireWorks extends Application implements MessageListener {
     /** Saves data shown in the quality column of the supplier table. */
     @FXML
     private TableColumn<SupplyOrder, String> orderedQualityColumn;
-    /** Label for the current number of elements in the effect container. */
+    /** Saves data shown in the color column of the supplier table. */
     @FXML
-    private Label effectCounterLabel;
-    /** Saves data shown in the effectCounterLabel. */
-    private static Integer effectCounter = 0;
-    /** Saves data shown in the effectCounterLabel. */
-    private static StringProperty effectCounterProperty =
-            new SimpleStringProperty(effectCounter.toString());
+    private TableColumn<SupplyOrder, String> orderedColorColumn;
+
+    /** Label for the current number of the blue effects in the container.*/
+    @FXML
+    private Label blueEffectCounterLabel;
+    /** Saves data shown in the blueEffectCounterLabel. */
+    private static Integer blueEffectCounter = 0;
+    /** Saves data shown in the blueEffectCounterLabel. */
+    private static IntegerProperty blueEffectCounterProperty =
+            new SimpleIntegerProperty(blueEffectCounter);
+    /** Label for the current number of the green effects in the container.*/
+    @FXML
+    private Label greenEffectCounterLabel;
+    /** Saves data shown in the greenEffectCounterLabel. */
+    private static Integer greenEffectCounter = 0;
+    /** Saves data shown in the greenEffectCounterLabel. */
+    private static IntegerProperty greenEffectCounterProperty =
+            new SimpleIntegerProperty(greenEffectCounter);
+    /** Label for the current number of the red effects in the container.*/
+    @FXML
+    private Label redEffectCounterLabel;
+    /** Saves data shown in the redEffectCounterLabel. */
+    private static Integer redEffectCounter = 0;
+    /** Saves data shown in the redEffectCounterLabel. */
+    private static IntegerProperty redEffectCounterProperty =
+            new SimpleIntegerProperty(redEffectCounter);
+
     /** Label for the current number of elements in the casing container. */
     @FXML
     private Label casingsCounterLabel;
@@ -199,6 +241,23 @@ public class FireWorks extends Application implements MessageListener {
     @FXML
     @SuppressWarnings("unused")
     private void initialize() {
+        // initialize purchase table
+        purchaseBuyerIdColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getBuyerId());
+        purchaseIdColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getPurchaseId());
+        purchaseStatusColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getStatusProperty());
+        purchaseNumberProducedColumn.setCellValueFactory(
+                cellData ->
+                        cellData.getValue().getNumberFinishedRocketsProperty());
+        purchaseNumberOrderedColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getNumberRocketsProperty());
+        purchaseEffectColors.setCellValueFactory(
+                cellData -> cellData.getValue().getEffectColorsProperty());
+        purchaseStorageAddressColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getBuyerURI());
+
         // initialize rocket table
         rocketIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getIdProperty());
@@ -233,10 +292,19 @@ public class FireWorks extends Application implements MessageListener {
                         cellData.getValue().getSupplierPropellantIdProperty());
         supplierEffectIdColumn.setCellValueFactory(
                 cellData -> cellData.getValue().getSupplierEffectIdProperty());
+        buyerIdColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getPurchaseBuyerIdProperty());
+        purchaseIdRocketColumn.setCellValueFactory(
+                cellData -> cellData.getValue().getPurchaseIdProperty());
 
         // initialize current warehouse labels
         casingsCounterLabel.textProperty().bind(casingsCounterProperty);
-        effectCounterLabel.textProperty().bind(effectCounterProperty);
+        blueEffectCounterLabel.textProperty().bind(
+                Bindings.convert(blueEffectCounterProperty));
+        greenEffectCounterLabel.textProperty().bind(
+                Bindings.convert(greenEffectCounterProperty));
+        redEffectCounterLabel.textProperty().bind(
+                Bindings.convert(redEffectCounterProperty));
         propellantCounterLabel.textProperty().bind(propellantCounterProperty);
         woodCounterLabel.textProperty().bind(woodCounterProperty);
         numberOpenPropellantLabel.textProperty().bind(
@@ -250,34 +318,42 @@ public class FireWorks extends Application implements MessageListener {
         supplierNameColumn.setCellValueFactory(
                 cellData -> cellData.getValue().supplierNameProperty());
         supplierNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        supplierNameColumn.isEditable();
 
         orderedTypeColumn.setCellValueFactory(
                 cellData -> cellData.getValue().typeProperty());
         orderedTypeColumn.setCellFactory(
                 ComboBoxTableCell.forTableColumn(TYPES_CHOICE_LIST));
-        orderedTypeColumn.isEditable();
+
+        orderedColorColumn.setCellValueFactory(
+                cellData -> cellData.getValue().colorProperty());
+        orderedColorColumn.setCellFactory(
+                ComboBoxTableCell.forTableColumn(EFFECT_COLOR_CHOICE_LIST));
 
         orderedQuantityColumn.setCellValueFactory(
                 cellData -> cellData.getValue().quantityProperty());
         orderedQuantityColumn.setCellFactory(
                 TextFieldTableCell.forTableColumn());
-        orderedQuantityColumn.isEditable();
 
         orderedQualityColumn.setCellValueFactory(
                 cellData -> cellData.getValue().qualityProperty());
         orderedQualityColumn.setCellFactory(
                 TextFieldTableCell.forTableColumn());
-        orderedQualityColumn.isEditable();
 
         //CHECKSTYLE:OFF
-        order.add(new SupplyOrder("Hulk", Casing.toString(), 50, 100));
-        order.add(new SupplyOrder("Iron Man", Wood.toString(), 50, 100));
-        order.add(new SupplyOrder("Captain America", Effect.toString(), 50, 100));
-        order.add(new SupplyOrder("Batman", Effect.toString(), 50, 80));
-        order.add(new SupplyOrder("Thor", Effect.toString(), 50, 60));
-        order.add(new SupplyOrder("Seaman", Propellant.toString(), 20, 100));
-        order.add(new SupplyOrder("Hawk", Propellant.toString(), 30, 100));
+        order.add(new SupplyOrder("Hulk", Casing.toString(), EffectColor.Blue,
+                50, 100));
+        order.add(new SupplyOrder("Iron Man", Wood.toString(), EffectColor.Blue,
+                50, 100));
+        order.add(new SupplyOrder("Captain America", Effect.toString(),
+                EffectColor.Blue, 50, 100));
+        order.add(new SupplyOrder("Batman", Effect.toString(), EffectColor.Red,
+                50, 100));
+        order.add(new SupplyOrder("Thor", Effect.toString(), EffectColor.Green,
+                50, 100));
+        order.add(new SupplyOrder("Seaman", Propellant.toString(),
+                EffectColor.Green, 50, 100));
+        order.add(new SupplyOrder("Hawk", Propellant.toString(),
+                EffectColor.Red, 50, 100));
         //CHECKSTYLE:ON
 
         supplyTable.isEditable();
@@ -285,6 +361,7 @@ public class FireWorks extends Application implements MessageListener {
 
         rocketTable.setItems(rockets);
         numberRocketsProperty.set(rockets.size());
+        purchaseTable.setItems(purchases);
     }
 
     /**
@@ -332,8 +409,23 @@ public class FireWorks extends Application implements MessageListener {
                 casingsCounterProperty.set(casingsCounter.toString());
             }
             if (material instanceof Effect) {
-                effectCounter = effectCounter + difference;
-                effectCounterProperty.set(effectCounter.toString());
+                Effect effect = (Effect) material;
+                switch (effect.getColor()) {
+                    case Blue:
+                        blueEffectCounter = blueEffectCounter + difference;
+                        blueEffectCounterProperty.set(blueEffectCounter);
+                        break;
+                    case Green:
+                        greenEffectCounter = greenEffectCounter + difference;
+                        greenEffectCounterProperty.set(greenEffectCounter);
+                        break;
+                    case Red:
+                        redEffectCounter = redEffectCounter + difference;
+                        redEffectCounterProperty.set(redEffectCounter);
+                        break;
+                    default:
+                        LOGGER.severe("Wrong color in effect!");
+                }
             }
             if (material instanceof Propellant) {
                 Propellant propellant = (Propellant) material;
@@ -401,12 +493,16 @@ public class FireWorks extends Application implements MessageListener {
                 numberRocketsProperty.set(rockets.size());
             }
             if (updatedRocket.getPackerId() != 0) {
-                if (updatedRocket.getTestResult()) {
-                    trashedRocketsList.add(updatedRocket);
-                    numberTrashedRocketsProperty.set(trashedRocketsList.size());
-                } else {
-                    packedRocketsList.add(updatedRocket);
-                    numberShippedRocketsProperty.set(packedRocketsList.size());
+                switch (updatedRocket.getTestResult()) {
+                    case Bad:
+                        trashedRocketsList.add(updatedRocket);
+                        numberTrashedRocketsProperty.set(
+                                trashedRocketsList.size());
+                        break;
+                    default:
+                        packedRocketsList.add(updatedRocket);
+                        numberShippedRocketsProperty.set(
+                                packedRocketsList.size());
                 }
             }
         });
@@ -493,6 +589,20 @@ public class FireWorks extends Application implements MessageListener {
                     stCellEditEvent) {
         stCellEditEvent.getTableView().getItems().get(
                 stCellEditEvent.getTablePosition().getRow()).setType(
+                stCellEditEvent.getNewValue());
+    }
+    /**
+     * This method will be invoked when the color of a material is changed.
+     *
+     * @param stCellEditEvent
+     *          The cell edit event sent by JavaFx when the user interface
+     *          element for this method is invoked.
+     */
+    public final void setColor(
+            final TableColumn.CellEditEvent<SupplyOrder, String>
+                    stCellEditEvent) {
+        stCellEditEvent.getTableView().getItems().get(
+                stCellEditEvent.getTablePosition().getRow()).setColor(
                 stCellEditEvent.getNewValue());
     }
 
@@ -589,6 +699,14 @@ public class FireWorks extends Application implements MessageListener {
             //TODO
             for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE)) {
+                changeCounterLabels((Effect) object);
+            }
+            for (Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_GREEN_EFFECT_QUEUE)) {
+                changeCounterLabels((Effect) object);
+            }
+            for (Object object : communicator.readMessagesInQueue(
+                    QueueDestinations.STORAGE_RED_EFFECT_QUEUE)) {
                 changeCounterLabels((Effect) object);
             }
             for (Object object : communicator.readMessagesInQueue(

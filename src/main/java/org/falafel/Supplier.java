@@ -74,9 +74,29 @@ public class Supplier extends Thread {
                 destinationStorage = QueueDestinations.STORAGE_CASING_QUEUE;
             } else if (orderType.equals(effect)) {
                 defect = index >= functioningElements;
-                newEntry = new Effect(materialId, orderSupplier, id, defect);
-                //TODO
-                destinationStorage = QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE;
+                switch (order.getColor()) {
+                    case Blue:
+                        newEntry = new Effect(materialId, orderSupplier, id,
+                                defect, EffectColor.Blue);
+                        destinationStorage =
+                                QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE;
+                        break;
+                    case Green:
+                        newEntry = new Effect(materialId, orderSupplier, id,
+                                defect, EffectColor.Green);
+                        destinationStorage =
+                                QueueDestinations.STORAGE_GREEN_EFFECT_QUEUE;
+                        break;
+                    case Red:
+                        newEntry = new Effect(materialId, orderSupplier, id,
+                                defect, EffectColor.Red);
+                        destinationStorage =
+                                QueueDestinations.STORAGE_RED_EFFECT_QUEUE;
+                        break;
+                    default:
+                        LOGGER.severe("Wrong effect color in order!");
+                        return;
+                }
             } else if (orderType.equals(propellant)) {
                 newEntry = new Propellant(materialId, orderSupplier, id,
                         Propellant.CLOSED);

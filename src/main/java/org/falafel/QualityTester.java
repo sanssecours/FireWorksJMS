@@ -76,12 +76,12 @@ public final class QualityTester {
                     defectCount++;
                 }
             }
-            if (defectCount > 1 || rocket.getPropellantQuantity()
-                                                    < MINIMAL_PROPELLANT) {
-                rocket.setTestResult(true);
-            } else {
-                rocket.setTestResult(false);
-            }
+//            if (defectCount > 1 || rocket.getPropellantQuantity()
+//                                                    < MINIMAL_PROPELLANT) {
+//                rocket.setTestResult(true);
+//            } else {
+//                rocket.setTestResult(false);
+//            }
 
             rocket.setTester(testerId);
 

@@ -16,11 +16,15 @@ public class SupplyOrder {
     private StringProperty quantityStringProperty;
     /** Defines how much mof the supplied material is broken. */
     private StringProperty qualityStringProperty;
+    /** Defines which color the supplied material is. */
+    private StringProperty colorStringProperty;
 
     /** The quantity of the current material. */
     private Integer quantity;
     /** The quality of the current material. */
     private Integer quality;
+    /** The color of the current material. */
+    private EffectColor color;
 
     /**
      * Create a new order with the specified attributes.
@@ -29,13 +33,16 @@ public class SupplyOrder {
      *          The name of the supplier
      * @param type
      *          The type of the supplied material
+     * @param color
+     *          The color of the supplied material
      * @param quantity
      *          The quantity of the supplied material
      * @param quality
      *          The quality of the supplied material
      */
     public SupplyOrder(final String name, final String type,
-                       final int quantity, final int quality) {
+                       final EffectColor color, final int quantity,
+                       final int quality) {
         supplierName = new SimpleStringProperty(name);
         this.type = new SimpleStringProperty(type);
         this.quantity = quantity;
@@ -44,12 +51,14 @@ public class SupplyOrder {
         this.quality = quality;
         this.qualityStringProperty =
                 new SimpleStringProperty(Integer.toString(quality));
+        this.color = color;
+        this.colorStringProperty = new SimpleStringProperty(color.toString());
     }
 
     //CHECKSTYLE:OFF
     /** Create a new predefined order. */
     public SupplyOrder() {
-        this("Name", "Wood", 1, 100);
+        this("Name", "Wood", EffectColor.Blue, 1, 100);
     }
     //CHECKSTYLE:ON
 
@@ -150,6 +159,15 @@ public class SupplyOrder {
     }
 
     /**
+     * Get the color of the material as string property.
+     *
+     * @return The color of the material
+     */
+    public final StringProperty colorProperty() {
+        return colorStringProperty;
+    }
+
+    /**
      * Get the quality of the material.
      *
      * @return The quality of the current material
@@ -171,13 +189,38 @@ public class SupplyOrder {
     }
 
     /**
+     * Get the effect color of the order.
+     *
+     * @return color of the order
+     */
+    public final EffectColor getColor() {
+        return color;
+    }
+
+    /**
+     * Set the effect color of the order.
+     *
+     * @param newColor the new color of the order
+     */
+    public final void setColor(final String newColor) {
+        colorStringProperty.set(newColor);
+        if (newColor.equals(EffectColor.Blue.toString())) {
+            color = EffectColor.Blue;
+        } else if (newColor.equals(EffectColor.Green.toString())) {
+            color = EffectColor.Green;
+        } else {
+            color = EffectColor.Red;
+        }
+    }
+    /**
      * Get the string representation for the order.
      *
      * @return A string representing the order
      */
     public final String toString() {
         return "Order: Supplier: " +  supplierName.get() + " -- Type: "
-                + type.get() + " -- Quantity: " + getQuantity()
+                + type.get() + " -- Color: " + getColor()
+                + " -- Quantity: " + getQuantity()
                 + " -- Quality: " + getQuality();
     }
 }
