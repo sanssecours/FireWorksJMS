@@ -185,7 +185,7 @@ public final class Worker {
 
                 while (randomColors.size() > 0 && effects.size()
                                                     < NUMBER_EFFECTS_NEEDED) {
-                    Effect effect = null;
+                    Effect effect;
                     int randomColor = randomGenerator.nextInt(
                             randomColors.size());
                     switch (randomColors.get(randomColor)) {
@@ -206,7 +206,6 @@ public final class Worker {
                             return;
                     }
 
-                    System.out.println("Effect " + effect);
                     if (effect != null) {
                         effects.add(effect);
                     } else {
