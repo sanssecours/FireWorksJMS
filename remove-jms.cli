@@ -33,8 +33,11 @@ jms-queue remove --queue-address=ShippedRocketQueue
 jms-queue remove --queue-address=OrderedRocketQueue
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OrderedRocketQueue/:remove
 
-jms-queue remove --queue-address=PurchaseQueue
-/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.PurchaseQueue/:remove
+jms-queue remove --queue-address=PurchaseOrderQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.PurchaseOrderQueue/:remove
+
+jms-queue remove --queue-address=CurrentPurchaseQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.CurrentPurchaseQueue/:remove
 
 jms-queue remove --queue-address=BenchmarkQueue
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:remove

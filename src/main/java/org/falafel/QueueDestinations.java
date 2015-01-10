@@ -57,10 +57,14 @@ public final class QueueDestinations {
             "jms/queue/rockets/ordered";
 
     /** Queue that stores the purchase orders. */
-    public static final String PURCHASE_QUEUE =
-            "jms/queue/rockets/purchase";
+    public static final String PURCHASE_ORDER_QUEUE =
+            "jms/queue/purchase/order";
+
+    /** Queue that stores the purchase orders. */
+    public static final String PURCHASE_CURRENT_QUEUE =
+            "jms/queue/purchase/current";
 
     /** Queue that stores the start/stop signal of the benchmark test. */
     public static final String BENCHMARK_QUEUE =
-            "jms/queue/rockets/benchmark";
+            "jms/queue/benchmark";
 }
