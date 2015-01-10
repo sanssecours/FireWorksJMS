@@ -176,45 +176,41 @@ public final class Worker {
                 ArrayList<EffectColor> randomColors = new ArrayList<>(
                         Arrays.asList(EffectColor.Blue, EffectColor.Green,
                                 EffectColor.Red));
+                JMSConsumer consumerBlue = context.createConsumer(
+                        destinationEffectBlue);
+                JMSConsumer consumerGreen = context.createConsumer(
+                        destinationEffectGreen);
+                JMSConsumer consumerRed = context.createConsumer(
+                        destinationEffectRed);
+
                 while (randomColors.size() > 0 && effects.size()
                                                     < NUMBER_EFFECTS_NEEDED) {
-                    JMSConsumer consumerEffect;
+                    Effect effect = null;
                     int randomColor = randomGenerator.nextInt(
                             randomColors.size());
-                    System.out.println("Random colors: "+ randomColors);
-                    System.out.println("Random int: "+ randomColor);
                     switch (randomColors.get(randomColor)) {
                         case Blue:
-                            System.out.println("Try blue");
-                            consumerEffect = context.createConsumer(
-                                    destinationEffectBlue);
+                            effect = consumerBlue.receiveBody(Effect.class,
+                                    WAIT_TIME_MESSAGE_MS);
                             break;
                         case Green:
-                            System.out.println("Try green");
-                            consumerEffect = context.createConsumer(
-                                    destinationEffectGreen);
+                            effect = consumerGreen.receiveBody(Effect.class,
+                                    WAIT_TIME_MESSAGE_MS);
                             break;
                         case Red:
-                            System.out.println("Try red");
-                            consumerEffect = context.createConsumer(
-                                    destinationEffectRed);
+                            effect = consumerRed.receiveBody(Effect.class,
+                                    WAIT_TIME_MESSAGE_MS);
                             break;
                         default:
-                            System.out.println("Was mache ich Wix Birn da????");
-                            consumerEffect = context.createConsumer(
-                                destinationEffectBlue);
+                            LOGGER.severe("Wrong color!");
+                            return;
                     }
-
-                    Effect effect = consumerEffect.receiveBody(Effect.class,
-                                WAIT_TIME_MESSAGE_MS);
 
                     System.out.println("Effect " + effect);
                     if (effect != null) {
                         effects.add(effect);
                     } else {
-                        System.out.println("Remove color " + randomColors.get(randomColor));
                         randomColors.remove(randomColor);
-                        System.out.println("Size " + randomColors.size());
                     }
                 }
 
