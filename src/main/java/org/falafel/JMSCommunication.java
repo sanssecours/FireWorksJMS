@@ -226,8 +226,8 @@ public class JMSCommunication {
 
             try (JMSContext context = connectionFactory.createContext(
                     USERNAME, PASSWORD)) {
+                JMSConsumer consumer = context.createConsumer(destination);
                 do {
-                    JMSConsumer consumer = context.createConsumer(destination);
                     text = consumer.receiveBody(Object.class,
                             WAIT_TIME_MESSAGE_MS);
                     if (text != null) {
