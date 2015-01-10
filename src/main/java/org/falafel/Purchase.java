@@ -145,9 +145,11 @@ public class Purchase implements Serializable {
      *
      * @param buyerId
      *          The identifier of the buyer
+     * @param buyerURI
+     *          The URI of the buyer of this rocket
      */
-    Purchase(final int buyerId) {
-        this(buyerId, 1, Red, Green, Blue, URI.create("xvsm://localhost:9876"));
+    Purchase(final int buyerId, final URI buyerURI) {
+        this(buyerId, 1, Red, Green, Blue, buyerURI);
     }
 
     /**

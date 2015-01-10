@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<SplitPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" dividerPositions="0.5" minHeight="-Infinity" minWidth="-Infinity" prefHeight="160.0" prefWidth="620.0" fx:controller="org.falafel.Buyer">
+    <BorderPane maxWidth="-Infinity" prefWidth="240.0">
+        <center>
+            <TableView fx:id="newPurchaseTableView" editable="true" minWidth="-Infinity" BorderPane.alignment="CENTER">
+                <columns>
+                    <TableColumn fx:id="newQuantityPurchaseColumn" minWidth="60.0" onEditCommit="#setQuantity" prefWidth="-1.0" text="Quantity"/>
+                    <TableColumn fx:id="newColor1PurchaseColumn" minWidth="60.0" onEditCommit="#setFirstEffectColor" prefWidth="-1.0" text="Color 1"/>
+                    <TableColumn fx:id="newColor2PurchaseColumn" minWidth="60.0" onEditCommit="#setSecondEffectColor" prefWidth="-1.0" text="Color 2"/>
+                    <TableColumn fx:id="newColor3PurchaseColumn" minWidth="60.0" onEditCommit="#setThirdEffectColor" prefWidth="-1.0" text="Color 3"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+        </center>
+        <bottom>
+            <HBox spacing="40.0">
+                <HBox spacing="20.0">
+                    <Button layoutX="186.0" layoutY="518.0" mnemonicParsing="false" onAction="#newPurchase" prefWidth="64.0" text="New"/>
+                    <Button mnemonicParsing="false" onAction="#clearPurchase" prefWidth="64.0" text="Clear"/>
+                </HBox>
+                <Button layoutX="372.0" layoutY="518.0" mnemonicParsing="false" onAction="#orderPurchase" prefWidth="64.0" text="Order"/>
+                <padding>
+                    <Insets left="10.0" right="10.0"/>
+                </padding>
+                <BorderPane.margin>
+                    <Insets bottom="5.0" top="5.0"/>
+                </BorderPane.margin>
+            </HBox>
+        </bottom>
+    </BorderPane>
+    <BorderPane prefHeight="200.0" prefWidth="200.0">
+        <center>
+            <TableView fx:id="purchaseTableView" minWidth="-Infinity" BorderPane.alignment="CENTER">
+                <columns>
+                    <TableColumn fx:id="statusPurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Status"/>
+                    <TableColumn fx:id="idPurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Id"/>
+                    <TableColumn fx:id="quantityPurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Quantity"/>
+                    <TableColumn fx:id="color1PurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Color 1"/>
+                    <TableColumn fx:id="color2PurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Color 2"/>
+                    <TableColumn fx:id="color3PurchaseColumn" minWidth="60.0" prefWidth="-1.0" text="Color 3"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+        </center>
+        <bottom>
+            <Button mnemonicParsing="false" onAction="#removePurchases" text="Remove Orders" BorderPane.alignment="CENTER">
+                <tooltip>
+                    <Tooltip text="Remove all finished and outstanding orders"/>
+                </tooltip>
+                <BorderPane.margin>
+                    <Insets bottom="5.0" top="5.0"/>
+                </BorderPane.margin>
+            </Button>
+        </bottom>
+    </BorderPane>
+</SplitPane>
