@@ -37,6 +37,7 @@ import javax.jms.ObjectMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -356,6 +357,12 @@ public class FireWorks extends Application implements MessageListener {
                 EffectColor.Red, 50, 100));
         //CHECKSTYLE:ON
 
+        //CHECKSTYLE:OFF
+        purchases.add(new Purchase(344, 10, EffectColor.Blue,
+                        EffectColor.Green, EffectColor.Red,
+                        URI.create("buyerSpaceURI")));
+        //CHECKSTYLE:ON
+
         supplyTable.isEditable();
         supplyTable.setItems(order);
 
@@ -509,6 +516,32 @@ public class FireWorks extends Application implements MessageListener {
     }
 
     /**
+     * Update the purchase table und the list of purchases currently active.
+     *
+     * @param purchase
+     *          the new purchase.
+     */
+    private void updatePurchasesAndTable(final Purchase purchase) {
+        boolean purchaseInTable = false;
+        for (int index = 0; index < purchases.size(); index++) {
+            Purchase tablePurchase = purchases.get(index);
+            if (tablePurchase.getPurchaseId().intValue()
+                    == purchase.getPurchaseId().intValue()
+                    && tablePurchase.getBuyerId().intValue()
+                    == purchase.getBuyerId().intValue()) {
+                purchaseInTable = true;
+                purchases.set(index, purchase);
+                break;
+            }
+        }
+        if (!purchaseInTable) {
+            purchases.add(purchase);
+        }
+
+    }
+
+
+    /**
      * This method will be invoked when we create a new order.
      *
      * @param actionEvent
@@ -650,6 +683,12 @@ public class FireWorks extends Application implements MessageListener {
      * Close the program.
      */
     private void close() {
+
+        JMSCommunication communicator = new JMSCommunication();
+        for (Purchase purchase : purchases) {
+            communicator.sendMessage(purchase,
+                    QueueDestinations.PURCHASE_ORDER_QUEUE);
+        }
         System.out.println("Goodbye!");
     }
 
@@ -670,33 +709,12 @@ public class FireWorks extends Application implements MessageListener {
     private void initListeners() {
         System.out.println("Set listeners to queues");
         try {
-            // Set up the namingContext for the JNDI lookup
-            final Properties env = new Properties();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
-            env.put(Context.PROVIDER_URL, PROVIDER_URL);
-            env.put(Context.SECURITY_PRINCIPAL, USERNAME);
-            env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
-            Context namingContext = new InitialContext(env);
-
-            ConnectionFactory connectionFactory = (ConnectionFactory)
-                    namingContext.lookup(CONNECTION_FACTORY);
-
-            Destination destination = (Destination) namingContext.lookup(
-                    QueueDestinations.GUI_QUEUE);
-
-            JMSConsumer consumer = connectionFactory.createContext(
-                    USERNAME, PASSWORD).createConsumer(
-                    destination);
-
-            consumer.setMessageListener(this);
-
             JMSCommunication communicator = new JMSCommunication();
             // read the content of the storage queues
             for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_CASING_QUEUE)) {
                 changeCounterLabels((Casing) object);
             }
-            //TODO
             for (Object object : communicator.readMessagesInQueue(
                     QueueDestinations.STORAGE_BLUE_EFFECT_QUEUE)) {
                 changeCounterLabels((Effect) object);
@@ -742,6 +760,10 @@ public class FireWorks extends Application implements MessageListener {
                     QueueDestinations.ROCKET_TRASHED_QUEUE)) {
                 updateOfARocketInRocketsTable((Rocket) object);
             }
+            for (Object object : communicator.receiveCompleteQueue(
+                    QueueDestinations.PURCHASE_ORDER_QUEUE)) {
+                updatePurchasesAndTable((Purchase) object);
+            }
 
             // Check with ids are in the queues and fill them so that each
             // contains 10 ids
@@ -782,6 +804,27 @@ public class FireWorks extends Application implements MessageListener {
                 communicator.sendMessage(last,
                         QueueDestinations.ID_PACKET_QUEUE);
             }
+
+            // Set up the namingContext for the JNDI lookup
+            final Properties env = new Properties();
+            env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+            env.put(Context.PROVIDER_URL, PROVIDER_URL);
+            env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+            env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+            Context namingContext = new InitialContext(env);
+
+            ConnectionFactory connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    QueueDestinations.GUI_QUEUE);
+
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
+
+            consumer.setMessageListener(this);
+
         } catch (NamingException e) {
             LOGGER.severe("Could not create properties");
         }
