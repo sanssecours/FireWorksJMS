@@ -882,10 +882,9 @@ public class FireWorks extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public final void clearOrder(final ActionEvent actionEvent) {
         order.clear();
-
         JMSCommunication communication = new JMSCommunication();
         ArrayList<Object> queuData =
-                communication.receiveCompleteQueue(QueueDestinations.PURCHASE_CURRENT_QUEUE);
+                communication.receiveCompleteQueue(QueueDestinations.ROCKET_ORDERED_QUEUE);
         System.out.println("CurrentPurchaseQueue: " + queuData);
     }
 }
