@@ -209,6 +209,7 @@ public final class Worker {
                             case Red:
                                 effect = consumerRed.receiveBody(Effect.class,
                                         WAIT_TIME_MESSAGE_MS);
+                                break;
                             default:
                                 LOGGER.severe("Worker: wrong effect color in"
                                         + "purchase");
