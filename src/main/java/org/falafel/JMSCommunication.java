@@ -12,6 +12,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -89,6 +90,30 @@ public class JMSCommunication {
             LOGGER.severe("Could not lookup destination!");
         }
     }
+
+    /**
+     * Send a purchase to a certain queue.
+     *
+     * @param msgPurchase
+     *          The purchase that should be stored in the queue.
+     * @param queue
+     *          The name of the queue where the integer value should be stored.
+     */
+    public final void sendMessage(final Purchase msgPurchase,
+                                  final String queue) {
+        try {
+            Destination destination = (Destination) namingContext.lookup(
+                    queue);
+
+            try (JMSContext context = connectionFactory.createContext(
+                    USERNAME, PASSWORD)) {
+                context.createProducer().send(destination, msgPurchase);
+            }
+        } catch (NamingException e) {
+            LOGGER.severe("Could not lookup destination!");
+        }
+    }
+
 
     /**
      * Send a Rocket object to a certain queue.
@@ -182,6 +207,38 @@ public class JMSCommunication {
             LOGGER.severe("Could not lookup destination!");
         }
         return text;
+    }
+
+    /**
+     * Returns the content of a queue.
+     *
+     * @param queue
+     *          The name of the queue from which the object should be received.
+     * @return
+     *          Collection which contains all queue entries.
+     */
+    public final ArrayList<Object> receiveCompleteQueue(final String queue) {
+        Object text = null;
+        ArrayList<Object> returnList = new ArrayList<>();
+        try {
+            Destination destination = (Destination) namingContext.lookup(
+                    queue);
+
+            try (JMSContext context = connectionFactory.createContext(
+                    USERNAME, PASSWORD)) {
+                do {
+                    JMSConsumer consumer = context.createConsumer(destination);
+                    text = consumer.receiveBody(Object.class,
+                            WAIT_TIME_MESSAGE_MS);
+                    if (text != null) {
+                        returnList.add(text);
+                    }
+                } while (text != null);
+            }
+        } catch (NamingException e) {
+            LOGGER.severe("Could not lookup destination!");
+        }
+        return returnList;
     }
 
     /**
