@@ -53,7 +53,7 @@ public final class QueueDestinations {
             "jms/queue/rockets/shipped";
 
     /** Queue that stores the ordered rockets. */
-    public static final String ROCKET_Ordered_QUEUE =
+    public static final String ROCKET_ORDERED_QUEUE =
             "jms/queue/rockets/ordered";
 
     /** Queue that stores the purchase orders. */
