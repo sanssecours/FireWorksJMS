@@ -355,13 +355,6 @@ public class FireWorks extends Application implements MessageListener {
                 EffectColor.Green, 50, 100));
         order.add(new SupplyOrder("Hawk", Propellant.toString(),
                 EffectColor.Red, 50, 100));
-        //CHECKSTYLE:ON
-
-        //CHECKSTYLE:OFF
-        purchases.add(new Purchase(344, 10, EffectColor.Blue,
-                        EffectColor.Green, EffectColor.Red,
-                        URI.create("buyerSpaceURI")));
-        //CHECKSTYLE:ON
 
         supplyTable.isEditable();
         supplyTable.setItems(order);
@@ -521,23 +514,8 @@ public class FireWorks extends Application implements MessageListener {
      * @param purchase
      *          the new purchase.
      */
-    private void updatePurchasesAndTable(final Purchase purchase) {
-        boolean purchaseInTable = false;
-        for (int index = 0; index < purchases.size(); index++) {
-            Purchase tablePurchase = purchases.get(index);
-            if (tablePurchase.getPurchaseId().intValue()
-                    == purchase.getPurchaseId().intValue()
-                    && tablePurchase.getBuyerId().intValue()
-                    == purchase.getBuyerId().intValue()) {
-                purchaseInTable = true;
-                purchases.set(index, purchase);
-                break;
-            }
-        }
-        if (!purchaseInTable) {
-            purchases.add(purchase);
-        }
-
+    private void addPurchaseToList(final Purchase purchase) {
+        Platform.runLater(() -> purchases.add(purchase));
     }
 
 
@@ -760,9 +738,10 @@ public class FireWorks extends Application implements MessageListener {
                     QueueDestinations.ROCKET_TRASHED_QUEUE)) {
                 updateOfARocketInRocketsTable((Rocket) object);
             }
+
             for (Object object : communicator.receiveCompleteQueue(
                     QueueDestinations.PURCHASE_ORDER_QUEUE)) {
-                updatePurchasesAndTable((Purchase) object);
+                addPurchaseToList((Purchase) object);
             }
 
             // Check with ids are in the queues and fill them so that each
