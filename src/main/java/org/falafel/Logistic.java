@@ -18,8 +18,10 @@ public final class Logistic {
     private static final int PACKAGE_SIZE = 5;
     /** Constant for how long the shutdown hook is waiting. */
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
-    /** Collected functioning rockets. */
-    private static ArrayList<Rocket> functioningRockets = new ArrayList<>();
+    /** Collected class A rockets. */
+    private static ArrayList<Rocket> rocketsClassA = new ArrayList<>();
+    /** Collected class B rockets. */
+    private static ArrayList<Rocket> rocketsClassB = new ArrayList<>();
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(Logistic.class.getName());
     /** Flag to tell if the program is shutdown. */
@@ -41,6 +43,7 @@ public final class Logistic {
         System.out.println("Leave the factory with Ctrl + C");
         int packerId;
         Rocket rocket;
+        Purchase purchase;
         JMSCommunication communicator = new JMSCommunication();
 
         if (arguments.length != 1) {
@@ -63,7 +66,7 @@ public final class Logistic {
             if (rocket == null) {
                 LOGGER.info("Could not get enough rockets!");
                 // put not packed rockets back
-                for (Rocket returnRocket : functioningRockets) {
+                for (Rocket returnRocket : rocketsClassA) {
                     returnRocket.setPackerId(0);
 //                    returnRocket.setReadyForCollection(false);
                     communicator.sendMessage(returnRocket,
@@ -71,25 +74,61 @@ public final class Logistic {
                     communicator.sendMessage(returnRocket,
                             QueueDestinations.GUI_QUEUE);
                 }
-                functioningRockets.clear();
+                rocketsClassA.clear();
+                for (Rocket returnRocket : rocketsClassB) {
+                    returnRocket.setPackerId(0);
+//                    returnRocket.setReadyForCollection(false);
+                    communicator.sendMessage(returnRocket,
+                            QueueDestinations.ROCKET_TESTED_QUEUE);
+                    communicator.sendMessage(returnRocket,
+                            QueueDestinations.GUI_QUEUE);
+                }
+                rocketsClassB.clear();
                 Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                 continue;
             }
 
             rocket.setPackerId(packerId);
-//            rocket.setReadyForCollection(true);
 
-            // trash rocket if its defect
-//            if (rocket.getTestResult()) {
-//                communicator.sendMessage(rocket,
-//                        QueueDestinations.ROCKET_TRASHED_QUEUE);
-//                communicator.sendMessage(rocket,
-//                        QueueDestinations.GUI_QUEUE);
-//            } else {
-//                functioningRockets.add(rocket);
-//            }
+            purchase = rocket.getPurchase();
+            switch (rocket.getTestResult()) {
+                case A:
+                    if (purchase == null) {
+                        rocketsClassA.add(rocket);
+                    } else {
+                        communicator.sendMessage(rocket,
+                                QueueDestinations.ROCKET_ORDERED_QUEUE);
+                        communicator.sendMessage(rocket,
+                                QueueDestinations.GUI_QUEUE);
+                    }
+                    break;
+                case B:
+                    if (purchase != null) {
+                        rocket.setPurchase(null);
+                    }
+                    rocketsClassB.add(rocket);
+                    break;
+                case Bad:
+                    if (purchase != null) {
+                        rocket.setPurchase(null);
+                    }
+                    communicator.sendMessage(rocket,
+                            QueueDestinations.ROCKET_TRASHED_QUEUE);
+                    communicator.sendMessage(rocket,
+                            QueueDestinations.GUI_QUEUE);
+                    break;
+                default:
+                    LOGGER.severe("Logistician has found wrong "
+                            + "quality class!");
+                    return;
+            }
 
-            if (functioningRockets.size() == PACKAGE_SIZE) {
+            if (rocket.getPurchase() == null && purchase != null) {
+                communicator.sendMessage(purchase,
+                        QueueDestinations.PURCHASE_CURRENT_QUEUE);
+            }
+
+            if (rocketsClassA.size() == PACKAGE_SIZE) {
                 // get an id and write a new on in the queue
                 Integer packageId;
                 packageId = (Integer) communicator.receiveMessage(
@@ -97,7 +136,7 @@ public final class Logistic {
                 if (packageId == null) {
                     LOGGER.severe("Could not get a package id!");
                     // put not packet rockets back
-                    for (Rocket returnRocket : functioningRockets) {
+                    for (Rocket returnRocket : rocketsClassA) {
                         returnRocket.setPackerId(0);
 //                        returnRocket.setReadyForCollection(false);
                         communicator.sendMessage(returnRocket,
@@ -105,7 +144,7 @@ public final class Logistic {
                         communicator.sendMessage(returnRocket,
                                 QueueDestinations.GUI_QUEUE);
                     }
-                    functioningRockets.clear();
+                    rocketsClassA.clear();
                     Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                     continue;
                 }
@@ -113,14 +152,64 @@ public final class Logistic {
                         QueueDestinations.ID_PACKET_QUEUE);
 
                 RocketPackage rocketPackage = new
-                        RocketPackage(packageId, functioningRockets);
+                        RocketPackage(packageId, rocketsClassA);
                 communicator.sendMessage(rocketPackage,
                         QueueDestinations.ROCKET_SHIPPED_QUEUE);
                 communicator.sendMessage(rocketPackage,
                         QueueDestinations.GUI_QUEUE);
-                functioningRockets.clear();
+                rocketsClassA.clear();
+            }
+            if (rocketsClassB.size() == PACKAGE_SIZE) {
+                // get an id and write a new on in the queue
+                Integer packageId;
+                packageId = (Integer) communicator.receiveMessage(
+                        QueueDestinations.ID_PACKET_QUEUE);
+                if (packageId == null) {
+                    LOGGER.severe("Could not get a package id!");
+                    // put not packet rockets back
+                    for (Rocket returnRocket : rocketsClassB) {
+                        returnRocket.setPackerId(0);
+//                        returnRocket.setReadyForCollection(false);
+                        communicator.sendMessage(returnRocket,
+                                QueueDestinations.ROCKET_TESTED_QUEUE);
+                        communicator.sendMessage(returnRocket,
+                                QueueDestinations.GUI_QUEUE);
+                    }
+                    rocketsClassB.clear();
+                    Utility.sleep(WAIT_TIME_LOGISTIC_MS);
+                    continue;
+                }
+                communicator.sendMessage(packageId + IDS_QUEUES_INIT,
+                        QueueDestinations.ID_PACKET_QUEUE);
+
+                RocketPackage rocketPackage = new
+                        RocketPackage(packageId, rocketsClassB);
+                communicator.sendMessage(rocketPackage,
+                        QueueDestinations.ROCKET_SHIPPED_QUEUE);
+                communicator.sendMessage(rocketPackage,
+                        QueueDestinations.GUI_QUEUE);
+                rocketsClassB.clear();
             }
         }
+
+        // put not packed rockets back
+        for (Rocket returnRocket : rocketsClassA) {
+            returnRocket.setPackerId(0);
+            communicator.sendMessage(returnRocket,
+                    QueueDestinations.ROCKET_TESTED_QUEUE);
+            communicator.sendMessage(returnRocket,
+                    QueueDestinations.GUI_QUEUE);
+        }
+        rocketsClassA.clear();
+        for (Rocket returnRocket : rocketsClassB) {
+            returnRocket.setPackerId(0);
+            communicator.sendMessage(returnRocket,
+                    QueueDestinations.ROCKET_TESTED_QUEUE);
+            communicator.sendMessage(returnRocket,
+                    QueueDestinations.GUI_QUEUE);
+        }
+        rocketsClassB.clear();
+
         communicator.closeCommunication();
     }
 
