@@ -78,6 +78,7 @@ public final class Worker {
         HashMap<Propellant, Integer> propellantsWithQuantity;
         Integer rocketId;
         Purchase purchase;
+        boolean gotPurchase;
         JMSCommunication communicator = new JMSCommunication();
         Random randomGenerator = new Random();
 
@@ -150,6 +151,7 @@ public final class Worker {
         workerLoop:
         while (!shutdown) {
             int propellantQuantity;
+            gotPurchase = false;
             effects.clear();
             /* Get materials */
             try (JMSContext context = connectionFactory.createContext(
@@ -193,6 +195,7 @@ public final class Worker {
                         WAIT_TIME_MESSAGE_MS);
 
                 if (purchase != null) {
+                    gotPurchase = true;
                     Collection<EffectColor> colors =
                             purchase.getEffectColors();
                     for (EffectColor color : colors) {
@@ -218,6 +221,7 @@ public final class Worker {
                         if (effect != null) {
                             effects.add(effect);
                         } else {
+                            gotPurchase = false;
                             break;
                         }
                     }
@@ -226,6 +230,7 @@ public final class Worker {
                 while (randomColors.size() > 0 && effects.size()
                                                     < NUMBER_EFFECTS_NEEDED) {
                     Effect effect;
+                    gotPurchase = false;
                     int randomColor = randomGenerator.nextInt(
                             randomColors.size());
                     switch (randomColors.get(randomColor)) {
@@ -330,6 +335,11 @@ public final class Worker {
             communicator.sendMessage(rocketId + NUMBER_INITIAL_IDS,
                     QueueDestinations.ID_ROCKET_QUEUE);
 
+            if (!gotPurchase) {
+                communicator.sendMessage(purchase,
+                        QueueDestinations.PURCHASE_CURRENT_QUEUE);
+            }
+
             //write to GUI what was taken
             casing.setInStorage(false);
             communicator.sendMessage(casing, QueueDestinations.GUI_QUEUE);
@@ -349,11 +359,17 @@ public final class Worker {
             int waitingTime = randomGenerator.nextInt(
                     UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
             sleep(waitingTime);
-
+            Rocket producedRocket;
             // Worker produces rocket
-            Rocket producedRocket = new Rocket(rocketId, wood, casing, effects,
-                    propellantsWithQuantity, propellantQuantity ,
-                    workerId);
+            if (gotPurchase) {
+                producedRocket = new Rocket(rocketId, wood, casing,
+                        effects, propellantsWithQuantity, propellantQuantity ,
+                        workerId, purchase);
+            } else {
+                producedRocket = new Rocket(rocketId, wood, casing,
+                        effects, propellantsWithQuantity, propellantQuantity ,
+                        workerId);
+            }
 
             communicator.sendMessage(producedRocket,
                     QueueDestinations.GUI_QUEUE);
