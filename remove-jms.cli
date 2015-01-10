@@ -30,4 +30,13 @@ jms-queue remove --queue-address=TrashedRocketQueue
 
 jms-queue remove --queue-address=ShippedRocketQueue
 
+jms-queue remove --queue-address=OrderedRocketQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OrderedRocketQueue/:remove
+
+jms-queue remove --queue-address=PurchaseQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.PurchaseQueue/:remove
+
+jms-queue remove --queue-address=BenchmarkQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:remove
+
 run-batch

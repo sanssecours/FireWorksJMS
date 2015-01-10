@@ -30,4 +30,13 @@ jms-queue add --queue-address=TrashedRocketQueue --entries=queue/rockets/trashed
 
 jms-queue add --queue-address=ShippedRocketQueue --entries=queue/rockets/shipped,java:jboss/exported/jms/queue/rockets/shipped
 
+jms-queue add --queue-address=PurchaseQueue --entries=queue/purchase,java:jboss/exported/jms/queue/purchase
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.PurchaseQueue/:add(max-delivery-attempts=-1)
+
+jms-queue add --queue-address=OrderedRocketQueue --entries=queue/rockets/ordered,java:jboss/exported/jms/queue/rockets/ordered
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OrderedRocketQueue/:add(max-delivery-attempts=-1)
+
+jms-queue add --queue-address=BenchmarkQueue --entries=queue/benchmark,java:jboss/exported/jms/queue/benchmark
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:add(max-delivery-attempts=-1)
+
 run-batch
