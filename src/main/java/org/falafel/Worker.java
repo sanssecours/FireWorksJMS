@@ -9,6 +9,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
@@ -76,6 +77,7 @@ public final class Worker {
         ArrayList<Effect> effects = new ArrayList<>();
         HashMap<Propellant, Integer> propellantsWithQuantity;
         Integer rocketId;
+        Purchase purchase;
         JMSCommunication communicator = new JMSCommunication();
         Random randomGenerator = new Random();
 
@@ -116,6 +118,7 @@ public final class Worker {
         Destination destinationOpenedPropellant;
         Destination destinationClosedPropellant;
         Destination destinationRocketId;
+        Destination destinationPurchase;
         try {
             destinationWood = (Destination) namingContext.lookup(
                     QueueDestinations.STORAGE_WOOD_QUEUE);
@@ -133,6 +136,8 @@ public final class Worker {
                     QueueDestinations.STORAGE_CLOSED_PROP_QUEUE);
             destinationRocketId = (Destination) namingContext.lookup(
                     QueueDestinations.ID_ROCKET_QUEUE);
+            destinationPurchase = (Destination) namingContext.lookup(
+                    QueueDestinations.PURCHASE_CURRENT_QUEUE);
         } catch (NamingException e) {
             LOGGER.severe("Could not create queue destinations");
             return;
@@ -172,7 +177,6 @@ public final class Worker {
                             WAIT_TIME_WORKER_MS));
                     continue;
                 }
-
                 ArrayList<EffectColor> randomColors = new ArrayList<>(
                         Arrays.asList(EffectColor.Blue, EffectColor.Green,
                                 EffectColor.Red));
@@ -182,6 +186,41 @@ public final class Worker {
                         destinationEffectGreen);
                 JMSConsumer consumerRed = context.createConsumer(
                         destinationEffectRed);
+
+                JMSConsumer consumerPurchase = context.createConsumer(
+                        destinationPurchase);
+                purchase = consumerPurchase.receiveBody(Purchase.class,
+                        WAIT_TIME_MESSAGE_MS);
+
+                if (purchase != null) {
+                    Collection<EffectColor> colors =
+                            purchase.getEffectColors();
+                    for (EffectColor color : colors) {
+                        Effect effect;
+                        switch (color) {
+                            case Blue:
+                                effect = consumerBlue.receiveBody(Effect.class,
+                                        WAIT_TIME_MESSAGE_MS);
+                                break;
+                            case Green:
+                                effect = consumerGreen.receiveBody(Effect.class,
+                                        WAIT_TIME_MESSAGE_MS);
+                                break;
+                            case Red:
+                                effect = consumerRed.receiveBody(Effect.class,
+                                        WAIT_TIME_MESSAGE_MS);
+                            default:
+                                LOGGER.severe("Worker: wrong effect color in"
+                                        + "purchase");
+                                return;
+                        }
+                        if (effect != null) {
+                            effects.add(effect);
+                        } else {
+                            break;
+                        }
+                    }
+                }
 
                 while (randomColors.size() > 0 && effects.size()
                                                     < NUMBER_EFFECTS_NEEDED) {
@@ -202,7 +241,7 @@ public final class Worker {
                                     WAIT_TIME_MESSAGE_MS);
                             break;
                         default:
-                            LOGGER.severe("Wrong color!");
+                            LOGGER.severe("Worker: wrong effect color!");
                             return;
                     }
 
