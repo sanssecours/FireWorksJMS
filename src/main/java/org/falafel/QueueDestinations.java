@@ -51,4 +51,16 @@ public final class QueueDestinations {
     /** Queue that stores the shipped rockets. */
     public static final String ROCKET_SHIPPED_QUEUE =
             "jms/queue/rockets/shipped";
+
+    /** Queue that stores the ordered rockets. */
+    public static final String ROCKET_Ordered_QUEUE =
+            "jms/queue/rockets/ordered";
+
+    /** Queue that stores the purchase orders. */
+    public static final String PURCHASE_QUEUE =
+            "jms/queue/rockets/purchase";
+
+    /** Queue that stores the start/stop signal of the benchmark test. */
+    public static final String BENCHMARK_QUEUE =
+            "jms/queue/rockets/benchmark";
 }
