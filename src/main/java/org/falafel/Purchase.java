@@ -363,4 +363,13 @@ public class Purchase implements Serializable {
     public final PurchaseStatus getStatus() {
         return status;
     }
+
+    /**
+     * Method to check if the ordered number equals the produced rockets.
+     *
+     * @return true if ordered and finished rockets is equal otherwise false.
+     */
+    public final boolean isPurchaseFinished () {
+        return (numberRockets.intValue() == numberFinishedRockets.intValue());
+    }
 }
