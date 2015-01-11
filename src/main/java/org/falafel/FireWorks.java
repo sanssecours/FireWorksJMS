@@ -731,15 +731,20 @@ public class FireWorks extends Application implements MessageListener {
             communicator.sendMessage(purchase,
                     QueueDestinations.PURCHASE_ORDER_QUEUE);
         }
+        for (Integer buyerId : orderedRockets.keySet()) {
+            for (Integer purchaseId : orderedRockets.get(buyerId).keySet()) {
+                communicator.sendMessage(
+                        orderedRockets.get(buyerId).get(purchaseId),
+                        QueueDestinations.ROCKET_ORDERED_QUEUE);
+            }
+        }
         System.out.println("Goodbye!");
     }
 
     /**
      * Start the fireworks factory.
      *
-     * @param arguments
-     *          A list containing the command line arguments.
-     *
+     * @param arguments A list containing the command line arguments.
      */
     public static void main(final String[] arguments) {
         launch(arguments);
