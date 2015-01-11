@@ -11,10 +11,6 @@ import java.util.Random;
  */
 public class Supplier extends Thread {
 
-    /** Constant for the lower bound of the loading time per element. */
-    private static final int LOWER_BOUND = 1000;
-    /** Constant for the upper bound of the loading time per element. */
-    private static final int UPPER_BOUND = 2000;
     /** Constant for the division by 100. */
     private static final double HUNDRED = 100.0;
     /** Save the (unique) identifier for this supplier. */
@@ -106,13 +102,6 @@ public class Supplier extends Thread {
                 newEntry = new Wood(materialId, orderSupplier, id);
                 destinationStorage = QueueDestinations.STORAGE_WOOD_QUEUE;
             }
-
-
-            int waitingTime = randomGenerator.nextInt(
-                    UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND;
-
-            Utility.sleep(waitingTime);
-
 
             newEntry.setID(materialId + index);
 
