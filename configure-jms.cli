@@ -1,4 +1,4 @@
-# Add the necessary queueus for the fireworks factory
+# Add the necessary queues for the fireworks factory
 
 batch
 
@@ -41,5 +41,9 @@ jms-queue add --queue-address=OrderedRocketQueue --entries=queue/rockets/ordered
 
 jms-queue add --queue-address=BenchmarkQueue --entries=queue/benchmark,java:jboss/exported/jms/queue/benchmark
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:add(max-delivery-attempts=-1)
+
+# Add Queues for buyers
+jms-queue add --queue-address=Buyer4001Queue --entries=queue/buyer/4001,java:jboss/exported/jms/queue/buyer/4001
+jms-queue add --queue-address=Buyer4002Queue --entries=queue/buyer/4002,java:jboss/exported/jms/queue/buyer/4002
 
 run-batch
