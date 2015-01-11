@@ -110,10 +110,6 @@ public class Supplier extends Thread {
 
             // Send to GUI
             communicator.sendMessage(newEntry, QueueDestinations.GUI_QUEUE);
-
-
-            LOGGER.info("Supplier " + id + " Wrote entry to queue "
-                    + orderType);
         }
         communicator.closeCommunication();
     }
