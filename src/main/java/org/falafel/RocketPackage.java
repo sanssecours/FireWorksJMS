@@ -49,6 +49,16 @@ public class RocketPackage implements Serializable {
     }
 
     /**
+     * Add Rocket to the package.
+     *
+     * @param rocket
+     *          the rocket which is added to the package
+     */
+    public final void addRocketToPackage(final Rocket rocket) {
+        rockets.add(rocket);
+    }
+
+    /**
      * Get the string representation for this rocket package.
      *
      * @return A string representing attributes of this rocket package.
