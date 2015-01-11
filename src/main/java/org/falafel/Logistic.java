@@ -97,8 +97,6 @@ public final class Logistic {
                         rocketsClassA.add(rocket);
                     } else {
                         communicator.sendMessage(rocket,
-                                QueueDestinations.ROCKET_ORDERED_QUEUE);
-                        communicator.sendMessage(rocket,
                                 QueueDestinations.GUI_QUEUE);
                     }
                     break;
