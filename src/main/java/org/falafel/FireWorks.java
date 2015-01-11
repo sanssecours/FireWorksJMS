@@ -581,6 +581,9 @@ public class FireWorks extends Application implements MessageListener {
                     }
                     break;
                 default:
+                    WritePurchasesToCurrentQueue writer
+                            = new WritePurchasesToCurrentQueue(purchase);
+                    writer.start();
                     purchases.add(purchase);
                     if (orderedRockets.containsKey(
                             purchase.getBuyerId().intValue())) {
@@ -946,9 +949,6 @@ public class FireWorks extends Application implements MessageListener {
                     instanceof Purchase) {
                 Purchase purchase = (Purchase)
                         ((ObjectMessage) message).getObject();
-                WritePurchasesToCurrentQueue writer
-                        = new WritePurchasesToCurrentQueue(purchase);
-                writer.start();
                 updatePurchases(purchase);
             } else {
                 LOGGER.severe("Wrong message in queue");
