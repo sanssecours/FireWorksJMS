@@ -56,7 +56,24 @@ public final class Logistic {
 
         LOGGER.info("Logistician " + packerId + " ready to pack!");
 
+        ArrayList<Object> benchmark = new ArrayList<>();
+        while (benchmark.isEmpty()) {
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+        }
+        LOGGER.severe("Logistician " + packerId + ": Starts the Benchmark");
         while (!shutdown) {
+            benchmark.clear();
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+
+            if (benchmark.isEmpty()) {
+                LOGGER.severe("Logistician " + packerId
+                        + ": Benchmark stopped!");
+                shutdown = true;
+                break;
+            }
+
             // get tested rocket
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_TESTED_QUEUE);
