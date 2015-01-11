@@ -12,7 +12,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -218,7 +217,7 @@ public class JMSCommunication {
      *          Collection which contains all queue entries.
      */
     public final ArrayList<Object> receiveCompleteQueue(final String queue) {
-        Object text = null;
+        Object text;
         ArrayList<Object> returnList = new ArrayList<>();
         try {
             Destination destination = (Destination) namingContext.lookup(
