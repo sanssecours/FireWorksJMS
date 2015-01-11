@@ -39,6 +39,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -95,6 +96,10 @@ public class FireWorks extends Application implements MessageListener {
                     Effect.toString(),
                     Propellant.toString(),
                     Wood.toString());
+    /** HashMap for the rockets in a purchase  */
+    /** The rocket counters for the different purchases. */
+    private static HashMap<Integer, HashMap<Integer, ArrayList<Rocket>>>
+            orderedRockets = new HashMap<>();
     /** Specify the different choices for the color of an effect. */
     private static final ObservableList<String> EFFECT_COLOR_CHOICE_LIST =
             FXCollections.observableArrayList(EffectColor.Blue.toString(),
@@ -493,16 +498,45 @@ public class FireWorks extends Application implements MessageListener {
                 numberRocketsProperty.set(rockets.size());
             }
             if (updatedRocket.getPackerId() != 0) {
-                switch (updatedRocket.getTestResult()) {
-                    case Bad:
-                        trashedRocketsList.add(updatedRocket);
-                        numberTrashedRocketsProperty.set(
-                                trashedRocketsList.size());
-                        break;
-                    default:
-                        packedRocketsList.add(updatedRocket);
-                        numberShippedRocketsProperty.set(
-                                packedRocketsList.size());
+                if (updatedRocket.getPurchase() == null) {
+                    switch (updatedRocket.getTestResult()) {
+                        case Bad:
+                            trashedRocketsList.add(updatedRocket);
+                            numberTrashedRocketsProperty.set(
+                                    trashedRocketsList.size());
+                            break;
+                        default:
+                            packedRocketsList.add(updatedRocket);
+                            numberShippedRocketsProperty.set(
+                                    packedRocketsList.size());
+                    }
+                } else {
+                    Purchase purchase = updatedRocket.getPurchase();
+                    for (int i = 0; i < purchases.size(); i++) {
+                        Purchase tempPurchase = purchases.get(i);
+                        if(tempPurchase.getBuyerId().intValue()
+                                == purchase.getBuyerId().intValue()
+                                && tempPurchase.getPurchaseId().intValue()
+                                == purchase.getPurchaseId().intValue()) {
+                            tempPurchase.addFinishedRockets(1);
+
+                            orderedRockets.get(tempPurchase.getBuyerId().
+                                    intValue()).get(tempPurchase.getPurchaseId().
+                                    intValue()).add(updatedRocket);
+                            if (tempPurchase.isPurchaseFinished()) {
+                                ArrayList<Rocket> tempList =
+                                        orderedRockets.get(tempPurchase.
+                                                getBuyerId().intValue()).get(
+                                                tempPurchase.getPurchaseId().
+                                                intValue());
+                                tempPurchase.setStatusToFinished();
+                                System.out.println("OrderedRocketList"
+                                        + tempList);
+                            }
+                            purchases.set(i, tempPurchase);
+                        }
+                    }
+
                 }
             }
         });
@@ -515,7 +549,20 @@ public class FireWorks extends Application implements MessageListener {
      *          the new purchase.
      */
     private void addPurchaseToList(final Purchase purchase) {
-        Platform.runLater(() -> purchases.add(purchase));
+        Platform.runLater(() -> {
+            purchases.add(purchase);
+            if (orderedRockets.containsKey(purchase.getBuyerId().intValue())) {
+                orderedRockets.get(purchase.getBuyerId().intValue()).put(
+                        purchase.getPurchaseId().intValue(),
+                        new ArrayList<>());
+            } else {
+                HashMap<Integer, ArrayList<Rocket>> temp = new HashMap<>();
+                temp.put(purchase.getPurchaseId().intValue(),
+                        new ArrayList<>());
+                orderedRockets.put(purchase.getBuyerId().intValue(),
+                        temp);
+            }
+        });
     }
 
 
