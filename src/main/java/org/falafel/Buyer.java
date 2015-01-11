@@ -489,6 +489,9 @@ public final class Buyer extends Application implements MessageListener {
     public void orderPurchase(final ActionEvent actionEvent) {
         purchased.addAll(purchases);
         addPurchasesToStorage(purchases);
+        for (Purchase purchase : purchases) {
+            communication.sendMessage(purchase, GUI_QUEUE);
+        }
         purchases.clear();
     }
 
