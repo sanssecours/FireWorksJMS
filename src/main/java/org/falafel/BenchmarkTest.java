@@ -10,6 +10,9 @@ public class BenchmarkTest extends Thread {
 
     /** Length of the Test in ms. */
     private static final int TEST_TIME = 10000;
+    /** Constant for how long the threads should sleep while waiting for the
+     * benchmark to start. */
+    public static final int WAIT_TIME_BENCHMARK = 500;
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = Logger.getLogger(
             BenchmarkTest.class.getName());

@@ -38,8 +38,6 @@ public final class Worker implements MessageListener {
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** Constant for how long the transaction is waiting. */
     private static final int WAIT_TIME_OUT = 20;
-    /** Constant for how long the transaction is waiting. */
-    private static final int WAIT_TIME_BENCHMARK = 500;
     /** How many effect charges are needed to build a rocket. */
     private static final int NUMBER_EFFECTS_NEEDED = 3;
     /** Specifies how many ids are stored in the queue for ids at the program
@@ -154,7 +152,7 @@ public final class Worker implements MessageListener {
         LOGGER.info("Worker " + workerId + " ready to work!");
 
         while (!startTest) {
-            Utility.sleep(WAIT_TIME_BENCHMARK);
+            Utility.sleep(BenchmarkTest.WAIT_TIME_BENCHMARK);
         }
 
         workerLoop:
