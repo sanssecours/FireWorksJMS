@@ -64,7 +64,22 @@ public final class QueueDestinations {
     public static final String PURCHASE_CURRENT_QUEUE =
             "jms/queue/purchase/current";
 
-    /** Queue that stores the start/stop signal of the benchmark test. */
-    public static final String BENCHMARK_QUEUE =
-            "jms/queue/benchmark";
+    /** Queue that stores the start/stop signal of the benchmark test of the
+     * worker with the id 1001. */
+    public static final String BENCHMARK_WORKER_1001_QUEUE =
+            "jms/queue/benchmark/worker1001";
+    /** Queue that stores the start/stop signal of the benchmark test of the
+     * worker with the id 1002. */
+    public static final String BENCHMARK_WORKER_1002_QUEUE =
+            "jms/queue/benchmark/worker1002";
+
+    /** Queue that stores the start/stop signal of the benchmark test of the
+     * worker with the id 1001. */
+    public static final String BENCHMARK_TESTER_QUEUE =
+            "jms/queue/benchmark/tester";
+
+    /** Queue that stores the start/stop signal of the benchmark test of the
+     * worker with the id 1001. */
+    public static final String BENCHMARK_LOGISTIC_QUEUE =
+            "jms/queue/benchmark/logistic";
 }
