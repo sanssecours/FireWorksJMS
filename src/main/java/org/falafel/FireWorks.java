@@ -570,14 +570,20 @@ public class FireWorks extends Application implements MessageListener {
         Platform.runLater(() -> {
             switch (purchase.getStatus()) {
                 case Shipped:
+                    Boolean foundPurchase = false;
                     for (int index = 0; index < purchases.size(); index++) {
                         Purchase tempPurchase = purchases.get(index);
                         if (tempPurchase.getBuyerId().intValue()
                                 == purchase.getBuyerId().intValue()
                                 && tempPurchase.getPurchaseId().intValue()
                                 == purchase.getPurchaseId().intValue()) {
+                            foundPurchase = true;
                             purchases.get(index).setStatusToShipped();
+                            break;
                         }
+                    }
+                    if (!foundPurchase) {
+                        purchases.add(purchase);
                     }
                     break;
                 default:
