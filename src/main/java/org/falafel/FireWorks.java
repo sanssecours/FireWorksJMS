@@ -972,5 +972,15 @@ public class FireWorks extends Application implements MessageListener {
     public final void clearOrder(final ActionEvent actionEvent) {
         order.clear();
     }
+
+    /**
+     * Start the benchmark test.
+     *
+     * @param actionEvent
+     *          The event sent by JavaFx when the user interface
+     *          element for this method is invoked.
+     */
+    public void startBenchmark(ActionEvent actionEvent) {
+    }
 }
 
