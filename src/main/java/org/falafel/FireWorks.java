@@ -613,13 +613,6 @@ public class FireWorks extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public final void newOrder(final ActionEvent actionEvent) {
         order.add(new SupplyOrder());
-        JMSCommunication communication = new JMSCommunication();
-
-        //CHECKSTYLE:OFF
-        Purchase purchase = new Purchase(1, 1, 5, EffectColor.Blue,
-                EffectColor.Green, EffectColor.Red, URI.create("buyerAddress"));
-        //CHECKSTYLE:ON
-        communication.sendMessage(purchase, QueueDestinations.GUI_QUEUE);
     }
 
     /**
@@ -978,11 +971,6 @@ public class FireWorks extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public final void clearOrder(final ActionEvent actionEvent) {
         order.clear();
-        JMSCommunication communication = new JMSCommunication();
-        ArrayList<Object> queuData =
-                communication.receiveCompleteQueue(
-                        QueueDestinations.ROCKET_ORDERED_QUEUE);
-        System.out.println("CurrentPurchaseQueue: " + queuData);
     }
 }
 
