@@ -63,6 +63,9 @@ public final class Buyer extends Application implements MessageListener {
     /** The URI of this buyer. */
     private static URI buyerURI;
 
+    /** The JSM communicate facility for this buyer. */
+    private static JMSCommunication communication = new JMSCommunication();
+
     /** The file where the buyer stores purchased items. */
     private static String storageLocationPurchases;
     /** The file where the buyer stores shipped rockets. */
@@ -411,8 +414,7 @@ public final class Buyer extends Application implements MessageListener {
         Purchase.setNextPurchaseId(maxPurchaseId + 1);
 
         /* Read rocket packages from server into storage */
-        JMSCommunication communicator = new JMSCommunication();
-        rocketPackages.addAll(communicator.readMessagesInQueue(
+        rocketPackages.addAll(communication.readMessagesInQueue(
                 buyerURI.toString()).stream().
                 map(object -> (RocketPackage) object).
                 collect(Collectors.toList()));
@@ -449,6 +451,7 @@ public final class Buyer extends Application implements MessageListener {
     /** Close resources handled by this buyer. */
     private void closeBuyer() {
         LOGGER.info("Close buyer " + buyerId);
+        communication.closeCommunication();
     }
 
     /**
@@ -635,7 +638,6 @@ public final class Buyer extends Application implements MessageListener {
      *          The purchase that was received
      */
     public static void acknowledgePurchase(final Purchase purchase) {
-        JMSCommunication communication = new JMSCommunication();
         purchase.setStatusToShipped();
         communication.sendMessage(purchase, GUI_QUEUE);
     }
