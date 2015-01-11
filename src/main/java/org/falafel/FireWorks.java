@@ -37,7 +37,6 @@ import javax.jms.ObjectMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -612,10 +611,6 @@ public class FireWorks extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public final void newOrder(final ActionEvent actionEvent) {
         order.add(new SupplyOrder());
-        JMSCommunication communication = new JMSCommunication();
-        Purchase purchase = new Purchase(1, 1, 5, EffectColor.Blue,
-                EffectColor.Green, EffectColor.Red, URI.create("buyerAddress"));
-        communication.sendMessage(purchase, QueueDestinations.GUI_QUEUE);
     }
 
     /**
