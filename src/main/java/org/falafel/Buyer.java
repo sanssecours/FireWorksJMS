@@ -193,7 +193,7 @@ public final class Buyer extends Application implements MessageListener {
         String fileEnding = buyerId + ".ser";
 
         storageLocationPurchases
-                = directoryStorageLocation + "rockets" + fileEnding;
+                = directoryStorageLocation + "purchases" + fileEnding;
         File fileRocketPackages = new File(storageLocationPurchases);
 
         /* Create storage if it does not exist already or is a directory */
