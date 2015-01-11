@@ -45,6 +45,7 @@ import static java.util.logging.Logger.getLogger;
 import static org.falafel.EffectColor.Blue;
 import static org.falafel.EffectColor.Green;
 import static org.falafel.EffectColor.Red;
+import static org.falafel.QueueDestinations.GUI_QUEUE;
 
 /**
  * This class represents a buyer of rockets.
@@ -415,6 +416,11 @@ public final class Buyer extends Application implements MessageListener {
                 buyerURI.toString()).stream().
                 map(object -> (RocketPackage) object).
                 collect(Collectors.toList()));
+        /* Acknowledge received rocket packages */
+        for (RocketPackage rocketPackage : rocketPackages) {
+            acknowledgePurchase(rocketPackage.getRockets().get(0).
+                    getPurchase());
+        }
         addRocketPackagesToStorage(rocketPackages);
 
         /* Read rocket packages from storage */
@@ -599,22 +605,38 @@ public final class Buyer extends Application implements MessageListener {
     public void onMessage(final Message message) {
         try {
             Object receivedObject = ((ObjectMessage) message).getObject();
+
             if (receivedObject instanceof RocketPackage) {
                 RocketPackage rocketPackage = (RocketPackage) receivedObject;
                 Purchase purchase = rocketPackage.getRockets().get(0).
                         getPurchase();
+
                 if (purchase.getBuyerId().intValue() == buyerId) {
-                    LOGGER.info("Received rocket package.");
+                    LOGGER.info("Received rocket package" + rocketPackage);
                     addRocketPackagesToStorage(asList(rocketPackage));
                     setPurchaseStatusToShipped(purchase.getPurchaseId().
                             intValue());
+                    acknowledgePurchase(purchase);
                 }
 
             } else {
                 LOGGER.severe("Got a message not containing a RocketPackage!");
             }
+
         } catch (JMSException e) {
             LOGGER.severe("Error while receiving a message!");
         }
+    }
+
+    /**
+     * Acknowledge to the server that the given purchase was received.
+     *
+     * @param purchase
+     *          The purchase that was received
+     */
+    public static void acknowledgePurchase(final Purchase purchase) {
+        JMSCommunication communication = new JMSCommunication();
+        purchase.setStatusToShipped();
+        communication.sendMessage(purchase, GUI_QUEUE);
     }
 }
