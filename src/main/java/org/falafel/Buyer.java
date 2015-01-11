@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
@@ -294,6 +295,22 @@ public final class Buyer extends Application implements MessageListener {
      * Initialize the space.
      */
     private static void initJMS() {
+        HashMap<Integer, Purchase> oldPurchases = new HashMap<>();
+        int purchaseId;
+        int maxPurchaseId = 0;
+
+        /* Read old values from storage */
+        for (Purchase purchase : readPurchasesFromStorage()) {
+            purchaseId = purchase.getPurchaseId().intValue();
+
+            oldPurchases.put(purchaseId, purchase);
+            if (purchaseId > maxPurchaseId) {
+                maxPurchaseId = purchaseId;
+            }
+        }
+        Purchase.setNextPurchaseId(maxPurchaseId + 1);
+        purchased.addAll(oldPurchases.values());
+
         //CHECKSTYLE:OFF
         purchases.addAll(asList(
             new Purchase(buyerId, 1, Red, Green, Blue, buyerURI),
@@ -301,7 +318,6 @@ public final class Buyer extends Application implements MessageListener {
             new Purchase(buyerId, 1, Green, Green, Green, buyerURI))
         );
         //CHECKSTYLE:ON
-        purchased.addAll(readPurchasesFromStorage());
     }
 
     /** Close resources handled by this buyer. */
