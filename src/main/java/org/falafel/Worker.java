@@ -168,7 +168,6 @@ public final class Worker implements MessageListener {
                 wood = consumerWood.receiveBody(Wood.class, WAIT_TIME_OUT);
                 if (wood == null) {
                     context.rollback();
-                    LOGGER.info("could not get wood");
                     continue;
                 }
 
@@ -178,7 +177,6 @@ public final class Worker implements MessageListener {
                         WAIT_TIME_OUT);
                 if (casing == null) {
                     context.rollback();
-                    LOGGER.info("could not get casings");
                     continue;
                 }
                 ArrayList<EffectColor> randomColors = new ArrayList<>(
@@ -262,7 +260,6 @@ public final class Worker implements MessageListener {
 
                 if (effects.size() != NUMBER_EFFECTS_NEEDED) {
                     context.rollback();
-                    LOGGER.info("could not get all effects. Got: " + effects);
                     continue;
                 }
 
@@ -306,8 +303,6 @@ public final class Worker implements MessageListener {
                                     missingQuantity);
                         } else {
                             context.rollback();
-                            LOGGER.info("Could not get all propellant. Got: "
-                                    + propellantsWithQuantity);
                             continue workerLoop;
                         }
                     }

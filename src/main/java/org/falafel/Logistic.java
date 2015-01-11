@@ -85,7 +85,6 @@ public final class Logistic implements MessageListener {
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_TESTED_QUEUE);
             if (rocket == null) {
-                LOGGER.info("Could not get enough rockets!");
                 // put not packed rockets back
                 for (Rocket returnRocket : rocketsClassA) {
                     returnRocket.setPackerId(0);

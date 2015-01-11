@@ -86,7 +86,6 @@ public final class QualityTester implements MessageListener {
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_PRODUCED_QUEUE);
             if (rocket == null) {
-                LOGGER.info("Could not get a rocket!");
                 continue;
             }
 
