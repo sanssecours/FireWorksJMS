@@ -78,7 +78,6 @@ public final class QualityTester implements MessageListener {
 
         LOGGER.info("Quality tester " + testerId + " ready to test!");
 
-
         while (!startTest) {
             Utility.sleep(BenchmarkTest.WAIT_TIME_BENCHMARK);
         }
@@ -176,9 +175,9 @@ public final class QualityTester implements MessageListener {
         startTest = !startTest;
 
         if (startTest) {
-            LOGGER.severe("Worker " + testerId + ": Starts the Benchmark");
+            LOGGER.severe("Tester " + testerId + ": Starts the Benchmark");
         } else {
-            LOGGER.severe("Worker " + testerId + ": Stops the Benchmark");
+            LOGGER.severe("Tester " + testerId + ": Stops the Benchmark");
         }
     }
 }
