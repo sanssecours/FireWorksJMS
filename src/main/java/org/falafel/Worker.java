@@ -34,6 +34,8 @@ public final class Worker {
     private static final int UPPER_QUANTITY = 145;
     /** Constant for how long the shutdown hook is waiting. */
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
+    /** Constant for how long the transaction is waiting. */
+    private static final int WAIT_TIME_OUT = 20;
     /** How many effect charges are needed to build a rocket. */
     private static final int NUMBER_EFFECTS_NEEDED = 3;
     /** Specifies how many ids are stored in the queue for ids at the program
@@ -148,7 +150,7 @@ public final class Worker {
                     USERNAME, PASSWORD, JMSContext.SESSION_TRANSACTED)) {
                 JMSConsumer consumerWood = context.createConsumer(
                         destinationWood);
-                wood = consumerWood.receiveBody(Wood.class);
+                wood = consumerWood.receiveBody(Wood.class, WAIT_TIME_OUT);
                 if (wood == null) {
                     context.rollback();
                     LOGGER.info("could not get wood");
@@ -157,7 +159,8 @@ public final class Worker {
 
                 JMSConsumer consumerCasing = context.createConsumer(
                         destinationCasing);
-                casing = consumerCasing.receiveBody(Casing.class);
+                casing = consumerCasing.receiveBody(Casing.class,
+                        WAIT_TIME_OUT);
                 if (casing == null) {
                     context.rollback();
                     LOGGER.info("could not get casings");
@@ -175,7 +178,8 @@ public final class Worker {
 
                 JMSConsumer consumerPurchase = context.createConsumer(
                         destinationPurchase);
-                purchase = consumerPurchase.receiveBody(Purchase.class);
+                purchase = consumerPurchase.receiveBody(Purchase.class,
+                        WAIT_TIME_OUT);
 
                 if (purchase != null) {
                     gotPurchase = true;
@@ -185,14 +189,16 @@ public final class Worker {
                         Effect effect;
                         switch (color) {
                             case Blue:
-                                effect = consumerBlue.receiveBody(Effect.class);
+                                effect = consumerBlue.receiveBody(Effect.class,
+                                        WAIT_TIME_OUT);
                                 break;
                             case Green:
                                 effect = consumerGreen.receiveBody(
-                                        Effect.class);
+                                        Effect.class, WAIT_TIME_OUT);
                                 break;
                             case Red:
-                                effect = consumerRed.receiveBody(Effect.class);
+                                effect = consumerRed.receiveBody(Effect.class,
+                                        WAIT_TIME_OUT);
                                 break;
                             default:
                                 LOGGER.severe("Worker: wrong effect color in"
@@ -216,13 +222,16 @@ public final class Worker {
                             randomColors.size());
                     switch (randomColors.get(randomColor)) {
                         case Blue:
-                            effect = consumerBlue.receiveBody(Effect.class);
+                            effect = consumerBlue.receiveBody(Effect.class,
+                                    WAIT_TIME_OUT);
                             break;
                         case Green:
-                            effect = consumerGreen.receiveBody(Effect.class);
+                            effect = consumerGreen.receiveBody(Effect.class,
+                                    WAIT_TIME_OUT);
                             break;
                         case Red:
-                            effect = consumerRed.receiveBody(Effect.class);
+                            effect = consumerRed.receiveBody(Effect.class,
+                                    WAIT_TIME_OUT);
                             break;
                         default:
                             LOGGER.severe("Worker: wrong effect color!");
@@ -253,7 +262,7 @@ public final class Worker {
                             context.createConsumer(destinationOpenedPropellant);
                     Propellant propellant =
                             consumerOpenedPropellant.receiveBody(
-                                    Propellant.class);
+                                    Propellant.class, WAIT_TIME_OUT);
                     if (propellant != null) {
                         int currentQuantity = propellant.getQuantity();
                         if (currentQuantity >= missingQuantity) {
@@ -275,7 +284,7 @@ public final class Worker {
                                         destinationClosedPropellant);
                         Propellant closedPropellant =
                                 consumerClosedPropellant.receiveBody(
-                                        Propellant.class);
+                                        Propellant.class, WAIT_TIME_OUT);
                         if (closedPropellant != null) {
                             quantity = quantity + missingQuantity;
                             propellantsWithQuantity.put(closedPropellant,
@@ -292,7 +301,8 @@ public final class Worker {
                 // get an id for the rocket from the queue
                 JMSConsumer consumerRocketId = context.createConsumer(
                         destinationRocketId);
-                rocketId = consumerRocketId.receiveBody(Integer.class);
+                rocketId = consumerRocketId.receiveBody(Integer.class,
+                        WAIT_TIME_OUT);
                 if (rocketId == null) {
                     context.rollback();
                     LOGGER.severe("Could not get an rocket id!");
