@@ -16,6 +16,10 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Logger;
@@ -32,7 +36,7 @@ import static org.falafel.EffectColor.Red;
  * A buyer orders rockets from the factory and stores them into his space after
  * the rockets were produced.
  */
-public final class Buyer extends Application {
+public final class Buyer extends Application implements MessageListener {
 
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = getLogger(Buyer.class.getName());
@@ -290,5 +294,25 @@ public final class Buyer extends Application {
 
         stCellEditEvent.getTableView().getItems().get(row).setThirdEffectColor(
                 stCellEditEvent.getNewValue());
+    }
+
+    /**
+     * This method will be called when the buyer receives a message.
+     *
+     * @param message
+     *          The message (from the fireworks factory)
+     */
+    @Override
+    public void onMessage(final Message message) {
+        try {
+            Object receivedObject = ((ObjectMessage) message).getObject();
+            if (receivedObject instanceof RocketPackage) {
+                LOGGER.info("Received rocket package.");
+            } else {
+                LOGGER.severe("Got a message not containing a RocketPackage!");
+            }
+        } catch (JMSException e) {
+            LOGGER.severe("Error while receiving a message!");
+        }
     }
 }
