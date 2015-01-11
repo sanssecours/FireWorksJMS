@@ -1,10 +1,24 @@
 package org.falafel;
 
 
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import static java.util.logging.Logger.getLogger;
+import static org.falafel.Utility.CONNECTION_FACTORY;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.PROVIDER_URL;
+import static org.falafel.Utility.USERNAME;
 
 
 /**
@@ -13,7 +27,7 @@ import static java.util.logging.Logger.getLogger;
  *      more than one effect charge is faulty
  *      it contains less than 120g of the propellant charge
  */
-public final class QualityTester {
+public final class QualityTester implements MessageListener {
     /** Constant for how long the shutdown hook is waiting. */
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** Constant for the minimum.*/
@@ -26,10 +40,16 @@ public final class QualityTester {
     /** Flag to tell if the program is shutdown. */
     private static boolean shutdown = false;
 
+    /** Start/Stop flag of the benchmark test. */
+    private static boolean startTest = false;
+    /** Tester id. */
+    private static int testerId;
+
     /**
      * Create the quality tester singleton.
      */
     private QualityTester() {
+        initListeners();
     }
 
     /**
@@ -40,7 +60,6 @@ public final class QualityTester {
     public static void main(final String[] arguments) {
         QualityTester.addShutdownHook();
         System.out.println("Leave the factory with Ctrl + C");
-        int testerId;
         Rocket rocket;
         ArrayList<Effect> effects;
         JMSCommunication communicator = new JMSCommunication();
@@ -55,26 +74,16 @@ public final class QualityTester {
             System.err.println("Please supply valid id!");
             return;
         }
+        new QualityTester();
 
         LOGGER.info("Quality tester " + testerId + " ready to test!");
 
-        ArrayList<Object> benchmark = new ArrayList<>();
-        while (benchmark.isEmpty()) {
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
+
+        while (!startTest) {
+            Utility.sleep(BenchmarkTest.WAIT_TIME_BENCHMARK);
         }
-        LOGGER.severe("Tester " + testerId + ": Starts the Benchmark");
-        while (!shutdown) {
-            benchmark.clear();
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
 
-            if (benchmark.isEmpty()) {
-                LOGGER.severe("Tester " + testerId + ": Benchmark stopped!");
-                shutdown = true;
-                break;
-            }
-
+        while (!shutdown && startTest) {
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_PRODUCED_QUEUE);
             if (rocket == null) {
@@ -123,5 +132,53 @@ public final class QualityTester {
                 System.out.println("I'm going home.");
             }
         });
+    }
+
+    /**
+     * Set the listener for the benchmark.
+     */
+    private void initListeners() {
+        // Set up the namingContext for the JNDI lookup
+        final Properties env = new Properties();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+        env.put(Context.PROVIDER_URL, PROVIDER_URL);
+        env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+        env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+        Context namingContext;
+
+        try {
+            namingContext = new InitialContext(env);
+
+            ConnectionFactory connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    QueueDestinations.BENCHMARK_TESTER_QUEUE);
+
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
+
+            consumer.setMessageListener(this);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Listener to start/stop the benchmark test.
+     *
+     * @param message
+     *          Signal to start/stop the test.
+     */
+    @Override
+    public void onMessage(final Message message) {
+        startTest = !startTest;
+
+        if (startTest) {
+            LOGGER.severe("Worker " + testerId + ": Starts the Benchmark");
+        } else {
+            LOGGER.severe("Worker " + testerId + ": Stops the Benchmark");
+        }
     }
 }
