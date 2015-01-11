@@ -36,7 +36,7 @@ test: compile
 	# Start buyers
 	$(foreach buyer, $(BUYER_IDS), \
 		echo Start buyer $(buyer); \
-		(mvn exec:java -PBuyer -Dbuyer.id=$(buyer) -Dbuyer.port=$(buyer) &);)
+		(mvn exec:java -PBuyer -Dbuyer.id=$(buyer) &);)
 
 	# Give buyers some time to order
 	sleep 5
