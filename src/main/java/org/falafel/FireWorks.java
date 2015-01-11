@@ -981,6 +981,8 @@ public class FireWorks extends Application implements MessageListener {
      *          element for this method is invoked.
      */
     public void startBenchmark(ActionEvent actionEvent) {
+        BenchmarkTest test = new BenchmarkTest();
+        test.start();
     }
 }
 
