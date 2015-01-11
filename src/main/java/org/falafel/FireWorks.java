@@ -521,9 +521,9 @@ public class FireWorks extends Application implements MessageListener {
                             tempPurchase.addFinishedRockets(1);
 
                             orderedRockets.get(tempPurchase.getBuyerId().
-                                    intValue()).get(tempPurchase.getPurchaseId().
-                                    intValue()).addRocketToPackage(
-                                    updatedRocket);
+                                    intValue()).get(tempPurchase.
+                                    getPurchaseId().intValue()).
+                                    addRocketToPackage(updatedRocket);
                             if (tempPurchase.isPurchaseFinished()) {
                                 RocketPackage tempList =
                                         orderedRockets.get(tempPurchase.
@@ -543,6 +543,12 @@ public class FireWorks extends Application implements MessageListener {
         });
     }
 
+    /**
+     * Collect the saved ordered rockets.
+     *
+     * @param rocketPackage
+     *          rocketPackage containing the rockets of a purchase.
+     */
     private void collectOrderedRocketsFromQueue(
                                 final RocketPackage rocketPackage) {
         Platform.runLater(() -> {
@@ -609,8 +615,11 @@ public class FireWorks extends Application implements MessageListener {
     public final void newOrder(final ActionEvent actionEvent) {
         order.add(new SupplyOrder());
         JMSCommunication communication = new JMSCommunication();
+
+        //CHECKSTYLE:OFF
         Purchase purchase = new Purchase(1, 1, 5, EffectColor.Blue,
                 EffectColor.Green, EffectColor.Red, URI.create("buyerAddress"));
+        //CHECKSTYLE:ON
         communication.sendMessage(purchase, QueueDestinations.GUI_QUEUE);
     }
 
