@@ -563,20 +563,37 @@ public class FireWorks extends Application implements MessageListener {
      *
      * @param purchase the new purchase.
      */
-    private void addPurchaseToList(final Purchase purchase) {
+    private void updatePurchases(final Purchase purchase) {
         Platform.runLater(() -> {
-            purchases.add(purchase);
-            if (orderedRockets.containsKey(purchase.getBuyerId().intValue())) {
-                orderedRockets.get(purchase.getBuyerId().intValue()).put(
-                        purchase.getPurchaseId().intValue(),
-                        new RocketPackage(0, new ArrayList<>()));
-            } else {
-                HashMap<Integer, RocketPackage> temp = new HashMap<>();
-                temp.put(purchase.getPurchaseId().intValue(),
-                        new RocketPackage(0, new ArrayList<>()));
-                orderedRockets.put(purchase.getBuyerId().intValue(),
-                        temp);
+            switch (purchase.getStatus()) {
+                case Shipped:
+                    for (int index = 0; index < purchases.size(); index++) {
+                        Purchase tempPurchase = purchases.get(index);
+                        if (tempPurchase.getBuyerId().intValue()
+                                == purchase.getBuyerId().intValue()
+                                && tempPurchase.getPurchaseId().intValue()
+                                == purchase.getPurchaseId().intValue()) {
+                            purchases.get(index).setStatusToShipped();
+                        }
+                    }
+                    break;
+                default:
+                    purchases.add(purchase);
+                    if (orderedRockets.containsKey(
+                            purchase.getBuyerId().intValue())) {
+                        orderedRockets.get(
+                                purchase.getBuyerId().intValue()).put(
+                                purchase.getPurchaseId().intValue(),
+                                new RocketPackage(0, new ArrayList<>()));
+                    } else {
+                        HashMap<Integer, RocketPackage> temp = new HashMap<>();
+                        temp.put(purchase.getPurchaseId().intValue(),
+                                new RocketPackage(0, new ArrayList<>()));
+                        orderedRockets.put(purchase.getBuyerId().intValue(),
+                                temp);
+                    }
             }
+
         });
     }
 
@@ -812,7 +829,7 @@ public class FireWorks extends Application implements MessageListener {
 
             for (Object object : communicator.receiveCompleteQueue(
                     QueueDestinations.PURCHASE_ORDER_QUEUE)) {
-                addPurchaseToList((Purchase) object);
+                updatePurchases((Purchase) object);
             }
             for (Object object : communicator.receiveCompleteQueue(
                     QueueDestinations.ROCKET_ORDERED_QUEUE)) {
@@ -933,7 +950,7 @@ public class FireWorks extends Application implements MessageListener {
                 WritePurchasesToCurrentQueue writer
                         = new WritePurchasesToCurrentQueue(purchase);
                 writer.start();
-                addPurchaseToList(purchase);
+                updatePurchases(purchase);
             } else {
                 LOGGER.severe("Wrong message in queue");
             }
