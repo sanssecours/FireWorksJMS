@@ -4,9 +4,10 @@
 
 # -- Variables -----------------------------------------------------------------
 
-WORKER_IDS = 1001 1002 1003 1004 1005 1006 1007
+WORKER_IDS = 1001 1002
 TESTER_IDS = 2001 2002
 LOGISTIC_IDS = 3001 3002
+BUYER_IDS = 4001
 
 # -- Rules --------------------------------------------------------------------
 
@@ -31,6 +32,14 @@ test: compile
 
 	# Give factory some time to initialize
 	sleep 10
+
+	# Start buyers
+	$(foreach buyer, $(BUYER_IDS), \
+		echo Start buyer $(buyer); \
+		(mvn exec:java -PBuyer -Dbuyer.id=$(buyer) -Dbuyer.port=$(buyer) &);)
+
+	# Give buyers some time to order
+	sleep 5
 
 	# Start workers
 	$(foreach worker, $(WORKER_IDS), \
