@@ -140,8 +140,24 @@ public final class Worker {
 
         LOGGER.info("Worker " + workerId + " ready to work!");
 
+        ArrayList<Object> benchmark = new ArrayList<>();
+        while (benchmark.isEmpty()) {
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+        }
+
+        LOGGER.severe("Worker " + workerId + ": Starts the Benchmark");
         workerLoop:
         while (!shutdown) {
+            benchmark.clear();
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+
+            if (benchmark.isEmpty()) {
+                LOGGER.severe("Worker " + workerId + ": Benchmark stopped!");
+                shutdown = true;
+                break;
+            }
             int propellantQuantity;
             gotPurchase = false;
             effects.clear();
