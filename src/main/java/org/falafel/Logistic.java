@@ -11,9 +11,6 @@ import static org.falafel.Utility.IDS_QUEUES_INIT;
  */
 public final class Logistic {
 
-    /** Specifies how long a logistic worker waits until he tries to get
-     *  new rockets after he was unable to get them the last time. */
-    private static final int WAIT_TIME_LOGISTIC_MS = 2000;
     /** Constant for how many rockets are in one package. */
     private static final int PACKAGE_SIZE = 5;
     /** Constant for how long the shutdown hook is waiting. */
@@ -84,7 +81,6 @@ public final class Logistic {
                             QueueDestinations.GUI_QUEUE);
                 }
                 rocketsClassB.clear();
-                Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                 continue;
             }
 
@@ -143,7 +139,6 @@ public final class Logistic {
                                 QueueDestinations.GUI_QUEUE);
                     }
                     rocketsClassA.clear();
-                    Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                     continue;
                 }
                 communicator.sendMessage(packageId + IDS_QUEUES_INIT,
@@ -174,7 +169,6 @@ public final class Logistic {
                                 QueueDestinations.GUI_QUEUE);
                     }
                     rocketsClassB.clear();
-                    Utility.sleep(WAIT_TIME_LOGISTIC_MS);
                     continue;
                 }
                 communicator.sendMessage(packageId + IDS_QUEUES_INIT,
