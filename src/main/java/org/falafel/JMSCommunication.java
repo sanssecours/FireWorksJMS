@@ -31,7 +31,7 @@ public class JMSCommunication {
     private static final Logger LOGGER =
             Logger.getLogger(JMSCommunication.class.getName());
     /** The time used to wait for one message from a certain queue. */
-    private static final int WAIT_TIME_MESSAGE_MS = 100;
+    private static final int WAIT_TIME_MESSAGE_MS = 5000;
 
     /** The naming context used to lookup the JMS queues. */
     private Context namingContext;
