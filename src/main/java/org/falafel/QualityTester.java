@@ -58,7 +58,23 @@ public final class QualityTester {
 
         LOGGER.info("Quality tester " + testerId + " ready to test!");
 
+        ArrayList<Object> benchmark = new ArrayList<>();
+        while (benchmark.isEmpty()) {
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+        }
+        LOGGER.severe("Tester " + testerId + ": Starts the Benchmark");
         while (!shutdown) {
+            benchmark.clear();
+            benchmark = communicator.readMessagesInQueue(
+                    QueueDestinations.BENCHMARK_QUEUE);
+
+            if (benchmark.isEmpty()) {
+                LOGGER.severe("Tester " + testerId + ": Benchmark stopped!");
+                shutdown = true;
+                break;
+            }
+
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_PRODUCED_QUEUE);
             if (rocket == null) {
