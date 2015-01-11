@@ -601,11 +601,14 @@ public final class Buyer extends Application implements MessageListener {
             Object receivedObject = ((ObjectMessage) message).getObject();
             if (receivedObject instanceof RocketPackage) {
                 RocketPackage rocketPackage = (RocketPackage) receivedObject;
-
-                LOGGER.info("Received rocket package.");
-                addRocketPackagesToStorage(asList(rocketPackage));
-                setPurchaseStatusToShipped(rocketPackage.getRockets().get(0).
-                        getPurchase().getPurchaseId().intValue());
+                Purchase purchase = rocketPackage.getRockets().get(0).
+                        getPurchase();
+                if (purchase.getBuyerId().intValue() == buyerId) {
+                    LOGGER.info("Received rocket package.");
+                    addRocketPackagesToStorage(asList(rocketPackage));
+                    setPurchaseStatusToShipped(purchase.getPurchaseId().
+                            intValue());
+                }
 
             } else {
                 LOGGER.severe("Got a message not containing a RocketPackage!");
