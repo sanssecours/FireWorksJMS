@@ -514,7 +514,7 @@ public class FireWorks extends Application implements MessageListener {
                     Purchase purchase = updatedRocket.getPurchase();
                     for (int i = 0; i < purchases.size(); i++) {
                         Purchase tempPurchase = purchases.get(i);
-                        if(tempPurchase.getBuyerId().intValue()
+                        if (tempPurchase.getBuyerId().intValue()
                                 == purchase.getBuyerId().intValue()
                                 && tempPurchase.getPurchaseId().intValue()
                                 == purchase.getPurchaseId().intValue()) {
@@ -543,21 +543,23 @@ public class FireWorks extends Application implements MessageListener {
         });
     }
 
-    private void collectOrderedRocketsFromQueue(Rocket rocket) {
+    private void collectOrderedRocketsFromQueue(final RocketPackage rocketPackage) {
         Platform.runLater(() -> {
-            Integer purchaseId = rocket.getPurchase().getPurchaseId().intValue();
-            Integer buyerId = rocket.getPurchase().getBuyerId().intValue();
-            orderedRockets.get(buyerId).get(purchaseId).addRocketToPackage(
-                    rocket);
-            rockets.add(rocket);
+            for (Rocket rocket : rocketPackage.getRockets()) {
+                Integer purchaseId = rocket.getPurchase().getPurchaseId().intValue();
+                Integer buyerId = rocket.getPurchase().getBuyerId().intValue();
+                orderedRockets.get(buyerId).get(purchaseId).addRocketToPackage(
+                        rocket);
+                rockets.add(rocket);
+                numberRocketsProperty.set(rockets.size());
+            }
         });
     }
 
     /**
      * Update the purchase table und the list of purchases currently active.
      *
-     * @param purchase
-     *          the new purchase.
+     * @param purchase the new purchase.
      */
     private void addPurchaseToList(final Purchase purchase) {
         Platform.runLater(() -> {
@@ -807,7 +809,7 @@ public class FireWorks extends Application implements MessageListener {
             }
             for (Object object : communicator.receiveCompleteQueue(
                     QueueDestinations.ROCKET_ORDERED_QUEUE)) {
-                collectOrderedRocketsFromQueue((Rocket) object);
+                collectOrderedRocketsFromQueue((RocketPackage) object);
             }
 
             // Check with ids are in the queues and fill them so that each
