@@ -272,6 +272,25 @@ public final class Buyer extends Application implements MessageListener {
     }
 
     /**
+     * Remove all purchases from the storage.
+     */
+    private static void removePurchasesFromStorage() {
+        try (
+                OutputStream file = new FileOutputStream(
+                        storageLocationPurchases);
+                OutputStream buffer = new BufferedOutputStream(file);
+                ObjectOutput output = new ObjectOutputStream(buffer)
+        ) {
+            output.writeObject(new ArrayList<Purchase>());
+        } catch (IOException ex) {
+            LOGGER.severe("Could not create new storage file for purchased "
+                    + "items!");
+        }
+        LOGGER.info("Cleared purchases from storage");
+
+    }
+
+    /**
      * Initialize the space.
      */
     private static void initJMS() {
@@ -337,6 +356,7 @@ public final class Buyer extends Application implements MessageListener {
      */
     @SuppressWarnings("unused")
     public void removePurchases(final ActionEvent actionEvent) {
+        removePurchasesFromStorage();
         purchased.clear();
     }
 
