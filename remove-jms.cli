@@ -39,7 +39,15 @@ jms-queue remove --queue-address=PurchaseOrderQueue
 jms-queue remove --queue-address=CurrentPurchaseQueue
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.CurrentPurchaseQueue/:remove
 
-jms-queue remove --queue-address=BenchmarkQueue
-/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:remove
+jms-queue remove --queue-address=BenchmarkWorker1001Queue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkWorker1001Queue/:remove
+jms-queue remove --queue-address=BenchmarkWorker1002Queue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkWorker1002Queue/:remove
+
+jms-queue remove --queue-address=BenchmarkTesterQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkTesterQueue/:remove
+
+jms-queue remove --queue-address=BenchmarkLogisticQueue
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkLogisticQueue/:remove
 
 run-batch

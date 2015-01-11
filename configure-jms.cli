@@ -39,7 +39,15 @@ jms-queue add --queue-address=CurrentPurchaseQueue --entries=queue/purchase/curr
 jms-queue add --queue-address=OrderedRocketQueue --entries=queue/rockets/ordered,java:jboss/exported/jms/queue/rockets/ordered
 /subsystem=messaging/hornetq-server=default/address-setting=jms.queue.OrderedRocketQueue/:add(max-delivery-attempts=-1)
 
-jms-queue add --queue-address=BenchmarkQueue --entries=queue/benchmark,java:jboss/exported/jms/queue/benchmark
-/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkQueue/:add(max-delivery-attempts=-1)
+jms-queue add --queue-address=BenchmarkWorker1001Queue --entries=queue/benchmark/worker1001,java:jboss/exported/jms/queue/benchmark/worker1001
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkWorker1001Queue/:add(max-delivery-attempts=-1)
+jms-queue add --queue-address=BenchmarkWorker1002Queue --entries=queue/benchmark/worker1002,java:jboss/exported/jms/queue/benchmark/worker1002
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkWorker1002Queue/:add(max-delivery-attempts=-1)
+
+jms-queue add --queue-address=BenchmarkTesterQueue --entries=queue/benchmark/tester,java:jboss/exported/jms/queue/benchmark/tester
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkTesterQueue/:add(max-delivery-attempts=-1)
+
+jms-queue add --queue-address=BenchmarkLogisticQueue --entries=queue/benchmark/logistic,java:jboss/exported/jms/queue/benchmark/logistic
+/subsystem=messaging/hornetq-server=default/address-setting=jms.queue.BenchmarkLogisticQueue/:add(max-delivery-attempts=-1)
 
 run-batch
