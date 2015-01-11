@@ -4,6 +4,8 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
+import javax.jms.Message;
+import javax.jms.MessageListener;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -26,7 +28,7 @@ import static org.falafel.Utility.PROVIDER_URL;
  * This class represents a worker. A worker collects materials and uses them
  * to create a rocket.
  */
-public final class Worker {
+public final class Worker implements MessageListener {
 
     /** Constant for the lower bound of the propellant quantity. */
     private static final int LOWER_QUANTITY = 115;
@@ -36,6 +38,8 @@ public final class Worker {
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** Constant for how long the transaction is waiting. */
     private static final int WAIT_TIME_OUT = 20;
+    /** Constant for how long the transaction is waiting. */
+    private static final int WAIT_TIME_BENCHMARK = 500;
     /** How many effect charges are needed to build a rocket. */
     private static final int NUMBER_EFFECTS_NEEDED = 3;
     /** Specifies how many ids are stored in the queue for ids at the program
@@ -47,13 +51,20 @@ public final class Worker {
     /** The naming context used to lookup the JMS queues. */
     private static Context namingContext;
 
+    /** Worker id. */
+    private static int workerId;
+
     /** Specifies if we want to terminate the program. This variable will be
      *  set to true after we press CTR-C. */
     private static boolean shutdown = false;
+    /** Start/Stop flag of the benchmark test. */
+    private static boolean startTest = false;
 
 
     /** Create the worker singleton. */
-    private Worker() { }
+    Worker() {
+        initListeners(workerId);
+    }
 
     /**
      * Start the worker process.
@@ -63,7 +74,6 @@ public final class Worker {
      *
      */
     public static void main(final String[] arguments) {
-        int workerId;
         Wood wood;
         Casing casing;
         ArrayList<Effect> effects = new ArrayList<>();
@@ -73,6 +83,7 @@ public final class Worker {
         boolean gotPurchase;
         JMSCommunication communicator = new JMSCommunication();
         Random randomGenerator = new Random();
+
 
         if (arguments.length != 1) {
             System.err.println("Usage: worker <Id>!");
@@ -85,6 +96,8 @@ public final class Worker {
             System.err.println("Please supply a valid id!");
             return;
         }
+
+        new Worker();
 
         // Setup communication
         ConnectionFactory connectionFactory;
@@ -140,24 +153,12 @@ public final class Worker {
 
         LOGGER.info("Worker " + workerId + " ready to work!");
 
-        ArrayList<Object> benchmark = new ArrayList<>();
-        while (benchmark.isEmpty()) {
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
+        while (!startTest) {
+            Utility.sleep(WAIT_TIME_BENCHMARK);
         }
 
-        LOGGER.severe("Worker " + workerId + ": Starts the Benchmark");
         workerLoop:
-        while (!shutdown) {
-            benchmark.clear();
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
-
-            if (benchmark.isEmpty()) {
-                LOGGER.severe("Worker " + workerId + ": Benchmark stopped!");
-                shutdown = true;
-                break;
-            }
+        while (!shutdown && startTest) {
             int propellantQuantity;
             gotPurchase = false;
             effects.clear();
@@ -408,5 +409,66 @@ public final class Worker {
                 }
             }
         });
+    }
+
+    /**
+     * Set the listener for the benchmark.
+     *
+     * @param workerId
+     *          sets to which queue the worker should listen.
+     */
+    private void initListeners(final int workerId) {
+        // Set up the namingContext for the JNDI lookup
+        final Properties env = new Properties();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+        env.put(Context.PROVIDER_URL, PROVIDER_URL);
+        env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+        env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+        Context namingContext;
+
+
+        String benchmarkQueue;
+        //CHECKSTYLE:OFF
+        if (workerId == 1001) {
+            benchmarkQueue = QueueDestinations.BENCHMARK_WORKER_1001_QUEUE;
+        } else {
+            benchmarkQueue = QueueDestinations.BENCHMARK_WORKER_1002_QUEUE;
+        }
+        //CHECKSTYLE:ON
+
+        try {
+            namingContext = new InitialContext(env);
+
+            ConnectionFactory connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    benchmarkQueue);
+
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
+
+            consumer.setMessageListener(this);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Listener to start/stop the benchmark test.
+     *
+     * @param message
+     *          Signal to start/stop the test.
+     */
+    @Override
+    public void onMessage(final Message message) {
+        startTest = !startTest;
+
+        if(startTest) {
+            LOGGER.severe("Worker " + workerId + ": Starts the Benchmark");
+        } else {
+            LOGGER.severe("Worker " + workerId + ": Stops the Benchmark");
+        }
     }
 }

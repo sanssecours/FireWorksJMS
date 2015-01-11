@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class BenchmarkTest extends Thread {
 
     /** Length of the Test in ms. */
-    private static final int TEST_TIME = 60000;
+    private static final int TEST_TIME = 10000;
     /** Get the Logger for the current class. */
     private static final Logger LOGGER = Logger.getLogger(
             BenchmarkTest.class.getName());
@@ -26,7 +26,14 @@ public class BenchmarkTest extends Thread {
     public final void run() {
         JMSCommunication communication = new JMSCommunication();
 
-        communication.sendMessage(1, QueueDestinations.BENCHMARK_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_WORKER_1001_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_WORKER_1002_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_TESTER_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_LOGISTIC_QUEUE);
 
         LOGGER.severe("Start of the Benchmark!");
         try {
@@ -35,7 +42,14 @@ public class BenchmarkTest extends Thread {
             System.out.println("Benchmark test sleep disturbed!");
         }
 
-        communication.receiveMessage(QueueDestinations.BENCHMARK_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_WORKER_1001_QUEUE);
+        communication.sendMessage(1,
+                QueueDestinations.BENCHMARK_WORKER_1002_QUEUE);
+        communication.receiveMessage(
+                QueueDestinations.BENCHMARK_TESTER_QUEUE);
+        communication.receiveMessage(
+                QueueDestinations.BENCHMARK_LOGISTIC_QUEUE);
 
         LOGGER.severe("End of the Benchmark!");
     }
