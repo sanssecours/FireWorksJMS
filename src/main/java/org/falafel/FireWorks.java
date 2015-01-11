@@ -347,19 +347,18 @@ public class FireWorks extends Application implements MessageListener {
 
         //CHECKSTYLE:OFF
         order.add(new SupplyOrder("Hulk", Casing.toString(), EffectColor.Blue,
-                50, 100));
+                1500, 100));
         order.add(new SupplyOrder("Iron Man", Wood.toString(), EffectColor.Blue,
-                50, 100));
+                1500, 100));
         order.add(new SupplyOrder("Captain America", Effect.toString(),
-                EffectColor.Blue, 50, 100));
+                EffectColor.Blue, 1500, 100));
         order.add(new SupplyOrder("Batman", Effect.toString(), EffectColor.Red,
-                50, 100));
+                1500, 100));
         order.add(new SupplyOrder("Thor", Effect.toString(), EffectColor.Green,
-                50, 100));
+                1500, 100));
         order.add(new SupplyOrder("Seaman", Propellant.toString(),
-                EffectColor.Green, 50, 100));
-        order.add(new SupplyOrder("Hawk", Propellant.toString(),
-                EffectColor.Red, 50, 100));
+                EffectColor.Green, 500, 100));
+        //CHECKSTYLE:ON
 
         supplyTable.isEditable();
         supplyTable.setItems(order);
