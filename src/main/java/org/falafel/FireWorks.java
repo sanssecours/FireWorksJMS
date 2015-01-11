@@ -543,10 +543,12 @@ public class FireWorks extends Application implements MessageListener {
         });
     }
 
-    private void collectOrderedRocketsFromQueue(final RocketPackage rocketPackage) {
+    private void collectOrderedRocketsFromQueue(
+                                final RocketPackage rocketPackage) {
         Platform.runLater(() -> {
             for (Rocket rocket : rocketPackage.getRockets()) {
-                Integer purchaseId = rocket.getPurchase().getPurchaseId().intValue();
+                Integer purchaseId =
+                        rocket.getPurchase().getPurchaseId().intValue();
                 Integer buyerId = rocket.getPurchase().getBuyerId().intValue();
                 orderedRockets.get(buyerId).get(purchaseId).addRocketToPackage(
                         rocket);
@@ -953,7 +955,8 @@ public class FireWorks extends Application implements MessageListener {
         order.clear();
         JMSCommunication communication = new JMSCommunication();
         ArrayList<Object> queuData =
-                communication.receiveCompleteQueue(QueueDestinations.ROCKET_ORDERED_QUEUE);
+                communication.receiveCompleteQueue(
+                        QueueDestinations.ROCKET_ORDERED_QUEUE);
         System.out.println("CurrentPurchaseQueue: " + queuData);
     }
 }
