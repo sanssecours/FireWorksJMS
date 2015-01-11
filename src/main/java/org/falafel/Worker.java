@@ -465,7 +465,7 @@ public final class Worker implements MessageListener {
     public void onMessage(final Message message) {
         startTest = !startTest;
 
-        if(startTest) {
+        if (startTest) {
             LOGGER.severe("Worker " + workerId + ": Starts the Benchmark");
         } else {
             LOGGER.severe("Worker " + workerId + ": Stops the Benchmark");
