@@ -14,9 +14,6 @@ import static java.util.logging.Logger.getLogger;
  *      it contains less than 120g of the propellant charge
  */
 public final class QualityTester {
-    /** Specifies how long a tester waits until he tries to get a new rocket
-     *  after he was unable to get one the last time. */
-    private static final int WAIT_TIME_TESTER_MS = 2000;
     /** Constant for how long the shutdown hook is waiting. */
     private static final int WAIT_TIME_TO_SHUTDOWN = 5000;
     /** Constant for the minimum.*/
@@ -66,7 +63,6 @@ public final class QualityTester {
                     QueueDestinations.ROCKET_PRODUCED_QUEUE);
             if (rocket == null) {
                 LOGGER.info("Could not get a rocket!");
-                Utility.sleep(WAIT_TIME_TESTER_MS);
                 continue;
             }
 
