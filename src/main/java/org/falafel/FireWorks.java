@@ -531,8 +531,12 @@ public class FireWorks extends Application implements MessageListener {
                                                 tempPurchase.getPurchaseId().
                                                 intValue());
                                 tempPurchase.setStatusToFinished();
+                                JMSCommunication communication
+                                        = new JMSCommunication();
                                 System.out.println("OrderedRocketList"
                                         + tempList.getRockets());
+                                communication.sendMessage(tempList,
+                                        purchase.getBuyerURI().toString());
                             }
                             purchases.set(i, tempPurchase);
                         }
