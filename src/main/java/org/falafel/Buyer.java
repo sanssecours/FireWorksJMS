@@ -62,6 +62,8 @@ public final class Buyer extends Application implements MessageListener {
 
     /** The file where the buyer stores purchased items. */
     private static String storageLocationPurchases;
+    /** The file where the buyer stores shipped rockets. */
+    private static String storageLocationRocketPackages;
 
     /** The data stored in the table for new purchases. */
     private static ObservableList<Purchase> purchases =
@@ -194,10 +196,13 @@ public final class Buyer extends Application implements MessageListener {
 
         storageLocationPurchases
                 = directoryStorageLocation + "purchases" + fileEnding;
-        File fileRocketPackages = new File(storageLocationPurchases);
+        storageLocationRocketPackages
+                = directoryStorageLocation + "rockets" + fileEnding;
+        File filePurchases = new File(storageLocationPurchases);
+        File fileRockets = new File(storageLocationRocketPackages);
 
         /* Create storage if it does not exist already or is a directory */
-        if (!fileRocketPackages.isFile()) {
+        if (!filePurchases.isFile()) {
             try (
                 OutputStream file = new FileOutputStream(
                         storageLocationPurchases);
@@ -210,6 +215,20 @@ public final class Buyer extends Application implements MessageListener {
                         + "items!");
             }
             LOGGER.info("Created new storage for purchases");
+        }
+
+        if (!fileRockets.isFile()) {
+            try (
+                OutputStream file = new FileOutputStream(
+                        storageLocationRocketPackages);
+                OutputStream buffer = new BufferedOutputStream(file);
+                ObjectOutput output = new ObjectOutputStream(buffer)
+            ) {
+                output.writeObject(new ArrayList<RocketPackage>());
+            } catch (IOException ex) {
+                LOGGER.severe("Could not create storage file for rockets!");
+            }
+            LOGGER.info("Created new storage for rockets");
         }
         LOGGER.info("Initialized storage");
     }
@@ -287,8 +306,25 @@ public final class Buyer extends Application implements MessageListener {
             LOGGER.severe("Could not create new storage file for purchased "
                     + "items!");
         }
-        LOGGER.info("Cleared purchases from storage");
+        LOGGER.info("Removed purchases from storage");
 
+    }
+
+    /**
+     * Remove all rockets from the storage.
+     */
+    private static void removeRocketsFromStorage() {
+        try (
+                OutputStream file = new FileOutputStream(
+                        storageLocationRocketPackages);
+                OutputStream buffer = new BufferedOutputStream(file);
+                ObjectOutput output = new ObjectOutputStream(buffer)
+        ) {
+            output.writeObject(new ArrayList<RocketPackage>());
+        } catch (IOException ex) {
+            LOGGER.severe("Could not create new storage file for rockets!");
+        }
+        LOGGER.info("Removed rockets from storage");
     }
 
     /**
@@ -373,6 +409,7 @@ public final class Buyer extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public void removePurchases(final ActionEvent actionEvent) {
         removePurchasesFromStorage();
+        removeRocketsFromStorage();
         purchased.clear();
     }
 
