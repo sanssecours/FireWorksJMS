@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.logging.Logger.getLogger;
@@ -393,10 +394,11 @@ public final class Buyer extends Application implements MessageListener {
      */
     private static void initJMS() {
         HashMap<Integer, Purchase> oldPurchases = new HashMap<>();
+        ArrayList<RocketPackage> rocketPackages = new ArrayList<>();
         int purchaseId;
         int maxPurchaseId = 0;
 
-        /* Read old values from storage */
+        /* Read old purchases from storage */
         for (Purchase purchase : readPurchasesFromStorage()) {
             purchaseId = purchase.getPurchaseId().intValue();
 
@@ -407,6 +409,15 @@ public final class Buyer extends Application implements MessageListener {
         }
         Purchase.setNextPurchaseId(maxPurchaseId + 1);
 
+        /* Read rocket packages from server into storage */
+        JMSCommunication communicator = new JMSCommunication();
+        rocketPackages.addAll(communicator.readMessagesInQueue(
+                buyerURI.toString()).stream().
+                map(object -> (RocketPackage) object).
+                collect(Collectors.toList()));
+        addRocketPackagesToStorage(rocketPackages);
+
+        /* Read rocket packages from storage */
         for (RocketPackage rocketPackage : readRocketPackagesFromStorage()) {
             Rocket rocket = rocketPackage.getRockets().get(0);
             Purchase purchase = oldPurchases.get(
