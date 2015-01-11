@@ -17,10 +17,16 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -37,6 +43,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -46,6 +53,11 @@ import static org.falafel.EffectColor.Blue;
 import static org.falafel.EffectColor.Green;
 import static org.falafel.EffectColor.Red;
 import static org.falafel.QueueDestinations.GUI_QUEUE;
+import static org.falafel.Utility.CONNECTION_FACTORY;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.PROVIDER_URL;
+import static org.falafel.Utility.USERNAME;
 
 /**
  * This class represents a buyer of rockets.
@@ -190,6 +202,31 @@ public final class Buyer extends Application implements MessageListener {
         primaryStage.setOnCloseRequest(event -> closeBuyer());
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
+
+        /* Add message listener for queue */
+        final Properties env = new Properties();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+        env.put(Context.PROVIDER_URL, PROVIDER_URL);
+        env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+        env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+        Context namingContext;
+        try {
+            namingContext = new InitialContext(env);
+            ConnectionFactory connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    buyerURI.toString());
+
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
+
+            consumer.setMessageListener(this);
+        } catch (NamingException e) {
+            LOGGER.severe("Could not add message listener!");
+            System.exit(1);
+        }
     }
 
     /**
@@ -414,10 +451,15 @@ public final class Buyer extends Application implements MessageListener {
         Purchase.setNextPurchaseId(maxPurchaseId + 1);
 
         /* Read rocket packages from server into storage */
-        rocketPackages.addAll(communication.readMessagesInQueue(
+        try {
+            rocketPackages.addAll(communication.readMessagesInQueue(
                 buyerURI.toString()).stream().
                 map(object -> (RocketPackage) object).
                 collect(Collectors.toList()));
+        } catch (NullPointerException e) {
+            LOGGER.severe("Could not get rocket packages from server!");
+            System.exit(1);
+        }
         /* Acknowledge received rocket packages */
         for (RocketPackage rocketPackage : rocketPackages) {
             acknowledgePurchase(rocketPackage.getRockets().get(0).
@@ -623,8 +665,9 @@ public final class Buyer extends Application implements MessageListener {
                     setPurchaseStatusToShipped(purchase.getPurchaseId().
                             intValue());
                     acknowledgePurchase(purchase);
+                } else {
+                    LOGGER.severe("Got a package for a different buyer");
                 }
-
             } else {
                 LOGGER.severe("Got a message not containing a RocketPackage!");
             }
