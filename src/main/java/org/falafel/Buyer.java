@@ -20,8 +20,21 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static java.util.Arrays.asList;
@@ -45,6 +58,9 @@ public final class Buyer extends Application implements MessageListener {
     private static Integer buyerId;
     /** The URI of this buyer. */
     private static URI buyerURI;
+
+    /** The file where the buyer stores purchased items. */
+    private static String storageLocationPurchases;
 
     /** The data stored in the table for new purchases. */
     private static ObservableList<Purchase> purchases =
@@ -102,6 +118,7 @@ public final class Buyer extends Application implements MessageListener {
             System.exit(1);
         }
 
+        initStorage();
         initJMS();
         launch(arguments);
     }
@@ -167,6 +184,94 @@ public final class Buyer extends Application implements MessageListener {
     }
 
     /**
+     * Initialize the local storage for the buyer.
+     */
+    private static void initStorage() {
+        String directoryStorageLocation
+                = System.getProperty("java.io.tmpdir") + File.separator;
+        String fileEnding = buyerId + ".ser";
+
+        storageLocationPurchases
+                = directoryStorageLocation + "rockets" + fileEnding;
+        File fileRocketPackages = new File(storageLocationPurchases);
+
+        /* Create storage if it does not exist already or is a directory */
+        if (!fileRocketPackages.isFile()) {
+            try (
+                OutputStream file = new FileOutputStream(
+                        storageLocationPurchases);
+                OutputStream buffer = new BufferedOutputStream(file);
+                ObjectOutput output = new ObjectOutputStream(buffer)
+            ) {
+                output.writeObject(new ArrayList<Purchase>());
+            } catch (IOException ex) {
+                LOGGER.severe("Could not create storage file for purchased "
+                        + "items!");
+            }
+            LOGGER.info("Created new storage for purchases");
+        }
+        LOGGER.info("Initialized storage");
+    }
+
+    /**
+     * Add the given purchases to the storage.
+     *
+     * @param purchases
+     *          A list of purchases that should be added to the current
+     *          purchases inside the storage
+     */
+    private static void addPurchasesToStorage(
+            final Collection<Purchase> purchases) {
+
+        /* Read old purchases */
+        ArrayList<Purchase> storedPurchases = readPurchasesFromStorage();
+
+        /* Add purchases */
+        storedPurchases.addAll(purchases);
+
+        /* Write all purchases */
+        try (
+            OutputStream file = new FileOutputStream(
+                    storageLocationPurchases);
+            OutputStream buffer = new BufferedOutputStream(file);
+            ObjectOutput output = new ObjectOutputStream(buffer)
+        ) {
+            output.writeObject(storedPurchases);
+        } catch (IOException ex) {
+            LOGGER.severe("Could not write purchases to storage");
+        }
+    }
+
+    /**
+     * Read all purchases from the storage.
+     *
+     * @return
+     *          A list containing all purchases in the storage
+     */
+    @SuppressWarnings("unchecked")
+    private static ArrayList<Purchase> readPurchasesFromStorage() {
+
+        ArrayList<Purchase> purchases = new ArrayList<>();
+
+        try (
+            InputStream file = new FileInputStream(storageLocationPurchases);
+            InputStream buffer = new BufferedInputStream(file);
+            ObjectInput input = new ObjectInputStream(buffer)
+        ) {
+            purchases = (ArrayList<Purchase>) input.readObject();
+
+        } catch (ClassNotFoundException ex) {
+            LOGGER.severe("Non compatible data in storage for purchased "
+                    + "items!");
+        } catch (IOException ex) {
+            LOGGER.severe("Could no read purchase storage!");
+            ex.printStackTrace();
+        }
+
+        return  purchases;
+    }
+
+    /**
      * Initialize the space.
      */
     private static void initJMS() {
@@ -177,6 +282,7 @@ public final class Buyer extends Application implements MessageListener {
             new Purchase(buyerId, 1, Green, Green, Green, buyerURI))
         );
         //CHECKSTYLE:ON
+        purchased.addAll(readPurchasesFromStorage());
     }
 
     /** Close resources handled by this buyer. */
@@ -218,6 +324,7 @@ public final class Buyer extends Application implements MessageListener {
     @SuppressWarnings("unused")
     public void orderPurchase(final ActionEvent actionEvent) {
         purchased.addAll(purchases);
+        addPurchasesToStorage(purchases);
         purchases.clear();
     }
 
