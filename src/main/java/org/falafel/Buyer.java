@@ -1,6 +1,7 @@
 package org.falafel;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -258,7 +259,7 @@ public final class Buyer extends Application implements MessageListener {
         ) {
             output.writeObject(storedPurchases);
         } catch (IOException ex) {
-            LOGGER.severe("Could not write purchases to storage");
+            LOGGER.severe("Could not write purchases to storage!");
         }
     }
 
@@ -288,7 +289,7 @@ public final class Buyer extends Application implements MessageListener {
             ex.printStackTrace();
         }
 
-        return  purchases;
+        return purchases;
     }
 
     /**
@@ -311,6 +312,65 @@ public final class Buyer extends Application implements MessageListener {
     }
 
     /**
+     * Add the given rocket packages to the storage.
+     *
+     * @param rocketPackages
+     *          A collection of rocket packages that should be added to the
+     *          current rocket packages inside the storage
+     */
+    private static void addRocketPackagesToStorage(
+            final Collection<RocketPackage> rocketPackages) {
+
+        /* Read old rocket packages */
+        ArrayList<RocketPackage> storedRocketPackages
+                = readRocketPackagesFromStorage();
+
+        /* Add purchases */
+        storedRocketPackages.addAll(rocketPackages);
+
+        /* Write all purchases */
+        try (
+            OutputStream file = new FileOutputStream(
+                    storageLocationRocketPackages);
+            OutputStream buffer = new BufferedOutputStream(file);
+            ObjectOutput output = new ObjectOutputStream(buffer)
+        ) {
+            output.writeObject(storedRocketPackages);
+        } catch (IOException ex) {
+            LOGGER.severe("Could not write rocket packages to storage!");
+        }
+    }
+
+    /**
+     * Read all rocket packages from the storage.
+     *
+     * @return
+     *          A list containing all rocket package in the storage
+     */
+    @SuppressWarnings("unchecked")
+    private static ArrayList<RocketPackage> readRocketPackagesFromStorage() {
+
+        ArrayList<RocketPackage> rocketPackages = new ArrayList<>();
+
+        try (
+            InputStream file = new FileInputStream(
+                    storageLocationRocketPackages);
+            InputStream buffer = new BufferedInputStream(file);
+            ObjectInput input = new ObjectInputStream(buffer)
+        ) {
+            rocketPackages = (ArrayList<RocketPackage>) input.readObject();
+
+        } catch (ClassNotFoundException ex) {
+            LOGGER.severe("Non compatible data in storage for purchased "
+                    + "items!");
+        } catch (IOException ex) {
+            LOGGER.severe("Could no read purchase storage!");
+        }
+
+        return rocketPackages;
+    }
+
+    /**
      * Remove all rockets from the storage.
      */
     private static void removeRocketsFromStorage() {
@@ -322,9 +382,10 @@ public final class Buyer extends Application implements MessageListener {
         ) {
             output.writeObject(new ArrayList<RocketPackage>());
         } catch (IOException ex) {
-            LOGGER.severe("Could not create new storage file for rockets!");
+            LOGGER.severe("Could not create new storage file for rocket "
+                    + "packages!");
         }
-        LOGGER.info("Removed rockets from storage");
+        LOGGER.info("Removed rocket packages from storage");
     }
 
     /**
@@ -345,6 +406,18 @@ public final class Buyer extends Application implements MessageListener {
             }
         }
         Purchase.setNextPurchaseId(maxPurchaseId + 1);
+
+        for (RocketPackage rocketPackage : readRocketPackagesFromStorage()) {
+            Rocket rocket = rocketPackage.getRockets().get(0);
+            Purchase purchase = oldPurchases.get(
+                    rocket.getPurchaseIdProperty().intValue());
+            if (purchase != null) {
+                purchase.setStatusToShipped();
+            } else {
+                LOGGER.info("No Purchase for rocket: " + rocket);
+            }
+        }
+
         purchased.addAll(oldPurchases.values());
 
         //CHECKSTYLE:OFF
@@ -476,6 +549,35 @@ public final class Buyer extends Application implements MessageListener {
                 stCellEditEvent.getNewValue());
     }
 
+    /** Set the status of the given purchase to finished.
+     *
+     *  @param purchaseId
+     *          The id of the purchase for which the status should be set
+     */
+    public static void setPurchaseStatusToShipped(final int purchaseId) {
+        Platform.runLater(() -> {
+            int purchaseToUpdateIndex = 0;
+            Purchase purchaseToUpdate = null;
+
+            /* We need to set the purchase in the ObservableArrayList.
+               If we just change the status of the purchase in the list, then
+               the GUI will not show the updated value. */
+            for (int purchase = 0; purchase < purchased.size(); purchase++) {
+                if (purchased.get(purchase).getPurchaseId().intValue()
+                        == purchaseId) {
+                    purchaseToUpdateIndex = purchase;
+                    purchaseToUpdate = purchased.get(purchase);
+                    break;
+                }
+            }
+
+            if (purchaseToUpdate != null) {
+                purchaseToUpdate.setStatusToShipped();
+                purchased.set(purchaseToUpdateIndex, purchaseToUpdate);
+            }
+        });
+    }
+
     /**
      * This method will be called when the buyer receives a message.
      *
@@ -487,7 +589,13 @@ public final class Buyer extends Application implements MessageListener {
         try {
             Object receivedObject = ((ObjectMessage) message).getObject();
             if (receivedObject instanceof RocketPackage) {
+                RocketPackage rocketPackage = (RocketPackage) receivedObject;
+
                 LOGGER.info("Received rocket package.");
+                addRocketPackagesToStorage(asList(rocketPackage));
+                setPurchaseStatusToShipped(rocketPackage.getRockets().get(0).
+                        getPurchase().getPurchaseId().intValue());
+
             } else {
                 LOGGER.severe("Got a message not containing a RocketPackage!");
             }
