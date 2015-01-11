@@ -51,7 +51,7 @@ public class BenchmarkTest extends Thread {
                 QueueDestinations.BENCHMARK_WORKER_1002_QUEUE);
         communication.sendMessage(1,
                 QueueDestinations.BENCHMARK_TESTER_QUEUE);
-        communication.receiveMessage(
+        communication.sendMessage(1,
                 QueueDestinations.BENCHMARK_LOGISTIC_QUEUE);
 
         LOGGER.severe("End of the Benchmark!");

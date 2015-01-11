@@ -1,15 +1,29 @@
 package org.falafel;
 
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSConsumer;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import static java.util.logging.Logger.getLogger;
+import static org.falafel.Utility.CONNECTION_FACTORY;
 import static org.falafel.Utility.IDS_QUEUES_INIT;
+import static org.falafel.Utility.INITIAL_CONTEXT_FACTORY;
+import static org.falafel.Utility.PASSWORD;
+import static org.falafel.Utility.PROVIDER_URL;
+import static org.falafel.Utility.USERNAME;
 
 /**
  * This class represents a logistic worker.
  */
-public final class Logistic {
+public final class Logistic implements MessageListener {
 
     /** Constant for how many rockets are in one package. */
     private static final int PACKAGE_SIZE = 5;
@@ -24,10 +38,16 @@ public final class Logistic {
     /** Flag to tell if the program is shutdown. */
     private static boolean shutdown = false;
 
+    /** Start/Stop flag of the benchmark test. */
+    private static boolean startTest = false;
+    /** Tester id. */
+    private static int packerId;
+
     /**
      * Create the quality tester singleton.
      */
     private Logistic() {
+        initListeners();
     }
 
     /**
@@ -38,7 +58,6 @@ public final class Logistic {
     public static void main(final String[] arguments) {
         Logistic.addShutdownHook();
         System.out.println("Leave the factory with Ctrl + C");
-        int packerId;
         Rocket rocket;
         Purchase purchase;
         JMSCommunication communicator = new JMSCommunication();
@@ -53,27 +72,15 @@ public final class Logistic {
             System.err.println("Please supply a valid id!");
             return;
         }
+        new Logistic();
 
         LOGGER.info("Logistician " + packerId + " ready to pack!");
 
-        ArrayList<Object> benchmark = new ArrayList<>();
-        while (benchmark.isEmpty()) {
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
+        while (!startTest) {
+            Utility.sleep(BenchmarkTest.WAIT_TIME_BENCHMARK);
         }
-        LOGGER.severe("Logistician " + packerId + ": Starts the Benchmark");
-        while (!shutdown) {
-            benchmark.clear();
-            benchmark = communicator.readMessagesInQueue(
-                    QueueDestinations.BENCHMARK_QUEUE);
 
-            if (benchmark.isEmpty()) {
-                LOGGER.severe("Logistician " + packerId
-                        + ": Benchmark stopped!");
-                shutdown = true;
-                break;
-            }
-
+        while (!shutdown && startTest) {
             // get tested rocket
             rocket = (Rocket) communicator.receiveMessage(
                     QueueDestinations.ROCKET_TESTED_QUEUE);
@@ -235,5 +242,53 @@ public final class Logistic {
                 System.out.println("I'm going home.");
             }
         });
+    }
+
+    /**
+     * Set the listener for the benchmark.
+     */
+    private void initListeners() {
+        // Set up the namingContext for the JNDI lookup
+        final Properties env = new Properties();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, INITIAL_CONTEXT_FACTORY);
+        env.put(Context.PROVIDER_URL, PROVIDER_URL);
+        env.put(Context.SECURITY_PRINCIPAL, USERNAME);
+        env.put(Context.SECURITY_CREDENTIALS, PASSWORD);
+        Context namingContext;
+
+        try {
+            namingContext = new InitialContext(env);
+
+            ConnectionFactory connectionFactory = (ConnectionFactory)
+                    namingContext.lookup(CONNECTION_FACTORY);
+
+            Destination destination = (Destination) namingContext.lookup(
+                    QueueDestinations.BENCHMARK_LOGISTIC_QUEUE);
+
+            JMSConsumer consumer = connectionFactory.createContext(
+                    USERNAME, PASSWORD).createConsumer(
+                    destination);
+
+            consumer.setMessageListener(this);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Listener to start/stop the benchmark test.
+     *
+     * @param message
+     *          Signal to start/stop the test.
+     */
+    @Override
+    public void onMessage(final Message message) {
+        startTest = !startTest;
+
+        if (startTest) {
+            LOGGER.severe("Tester " + packerId + ": Starts the Benchmark");
+        } else {
+            LOGGER.severe("Tester " + packerId + ": Stops the Benchmark");
+        }
     }
 }
