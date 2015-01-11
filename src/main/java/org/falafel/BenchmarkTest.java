@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class BenchmarkTest extends Thread {
 
     /** Length of the Test in ms. */
-    private static final int TEST_TIME = 10000;
+    private static final int TEST_TIME = 60000;
     /** Constant for how long the threads should sleep while waiting for the
      * benchmark to start. */
     public static final int WAIT_TIME_BENCHMARK = 500;
