@@ -98,7 +98,7 @@ public class FireWorks extends Application implements MessageListener {
                     Wood.toString());
     /** HashMap for the rockets in a purchase  */
     /** The rocket counters for the different purchases. */
-    private static HashMap<Integer, HashMap<Integer, ArrayList<Rocket>>>
+    private static HashMap<Integer, HashMap<Integer, RocketPackage>>
             orderedRockets = new HashMap<>();
     /** Specify the different choices for the color of an effect. */
     private static final ObservableList<String> EFFECT_COLOR_CHOICE_LIST =
@@ -522,16 +522,17 @@ public class FireWorks extends Application implements MessageListener {
 
                             orderedRockets.get(tempPurchase.getBuyerId().
                                     intValue()).get(tempPurchase.getPurchaseId().
-                                    intValue()).add(updatedRocket);
+                                    intValue()).addRocketToPackage(
+                                    updatedRocket);
                             if (tempPurchase.isPurchaseFinished()) {
-                                ArrayList<Rocket> tempList =
+                                RocketPackage tempList =
                                         orderedRockets.get(tempPurchase.
                                                 getBuyerId().intValue()).get(
                                                 tempPurchase.getPurchaseId().
                                                 intValue());
                                 tempPurchase.setStatusToFinished();
                                 System.out.println("OrderedRocketList"
-                                        + tempList);
+                                        + tempList.getRockets());
                             }
                             purchases.set(i, tempPurchase);
                         }
@@ -539,6 +540,16 @@ public class FireWorks extends Application implements MessageListener {
 
                 }
             }
+        });
+    }
+
+    private void collectOrderedRocketsFromQueue(Rocket rocket) {
+        Platform.runLater(() -> {
+            Integer purchaseId = rocket.getPurchase().getPurchaseId().intValue();
+            Integer buyerId = rocket.getPurchase().getBuyerId().intValue();
+            orderedRockets.get(buyerId).get(purchaseId).addRocketToPackage(
+                    rocket);
+            rockets.add(rocket);
         });
     }
 
@@ -554,11 +565,11 @@ public class FireWorks extends Application implements MessageListener {
             if (orderedRockets.containsKey(purchase.getBuyerId().intValue())) {
                 orderedRockets.get(purchase.getBuyerId().intValue()).put(
                         purchase.getPurchaseId().intValue(),
-                        new ArrayList<>());
+                        new RocketPackage(0, new ArrayList<>()));
             } else {
-                HashMap<Integer, ArrayList<Rocket>> temp = new HashMap<>();
+                HashMap<Integer, RocketPackage> temp = new HashMap<>();
                 temp.put(purchase.getPurchaseId().intValue(),
-                        new ArrayList<>());
+                        new RocketPackage(0, new ArrayList<>()));
                 orderedRockets.put(purchase.getBuyerId().intValue(),
                         temp);
             }
@@ -793,6 +804,10 @@ public class FireWorks extends Application implements MessageListener {
             for (Object object : communicator.receiveCompleteQueue(
                     QueueDestinations.PURCHASE_ORDER_QUEUE)) {
                 addPurchaseToList((Purchase) object);
+            }
+            for (Object object : communicator.receiveCompleteQueue(
+                    QueueDestinations.ROCKET_ORDERED_QUEUE)) {
+                collectOrderedRocketsFromQueue((Rocket) object);
             }
 
             // Check with ids are in the queues and fill them so that each
